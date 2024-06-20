@@ -2,6 +2,8 @@ package moe.protasis.yukicommons;
 
 import lombok.Getter;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.command.CommandProvider;
+import moe.protasis.yukicommons.api.command.impl.BukkitCommandProvider;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import org.bukkit.Bukkit;
@@ -28,6 +30,8 @@ public class YukiCommons extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
         Bukkit.getPluginManager().registerEvents(this, this);
+
+        new BukkitCommandProvider();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -40,7 +44,7 @@ public class YukiCommons extends JavaPlugin implements Listener {
 //                System.out.println(String.format("new class from auto register %s", clazz));
                 clazz
                         .getDeclaredConstructor(IAbstractPlayer.class)
-                        .newInstance(IAdapter.Get().Adapt(player));
+                        .newInstance(IAdapter.Get().AdaptToPlayer(player));
             } catch (Exception ex) {
                 getLogger().severe(String.format("An error occured while instantiating WrappedPlayer class %s:", clazz.getName()));
                 ex.printStackTrace();

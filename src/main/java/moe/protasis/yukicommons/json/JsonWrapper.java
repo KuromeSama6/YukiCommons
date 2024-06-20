@@ -71,6 +71,21 @@ public class JsonWrapper {
         String ret = GetString(path);
         return ret == null ? null : UUID.fromString(ret);
     }
+    public <T> List<T> GetList(String path, Class<T> clazz) {
+        List<T> ret = new ArrayList<>();
+        JsonElement ele = ResolvePath(path);
+        if (ele == null || !ele.isJsonArray()) return ret;
+
+        for (JsonElement jsonElement : ele.getAsJsonArray()) {
+            try {
+                ret.add(gson.fromJson(jsonElement, clazz));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ret;
+    }
 
     public <T> T GetObject(String path, Class<T> clazz) {
         JsonElement ret = ResolvePath(path);

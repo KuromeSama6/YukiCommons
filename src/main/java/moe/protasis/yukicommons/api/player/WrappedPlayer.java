@@ -129,13 +129,17 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         players.get(getClass()).remove(uuid);
     }
 
+    public <T extends WrappedPlayer> T GetPlayer(Class<T> clazz) {
+        return GetPlayer(uuid, clazz);
+    }
+
     public static <T extends IWrappedPlayer> T GetPlayer(UUID uuid, Class<T> clazz) {
         if (!players.containsKey(clazz)) return null;
         return (T)players.get(clazz).get(uuid);
     }
     public static <T extends IWrappedPlayer> T GetPlayer(Object player, Class<T> clazz) {
         if (player == null) return null;
-        IAbstractPlayer abstractPlayer = IAdapter.Get().Adapt(player);
+        IAbstractPlayer abstractPlayer = IAdapter.Get().AdaptToPlayer(player);
         if (abstractPlayer == null) return null;
         return GetPlayer(abstractPlayer.GetUuid(), clazz);
     }

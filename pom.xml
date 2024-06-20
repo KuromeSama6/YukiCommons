@@ -64,6 +64,12 @@
             <version>0.10.2</version>
         </dependency>
         <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
+            <type>javadoc</type>
+        </dependency>
+        <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
             <version>1.19-R0.1-SNAPSHOT</version>

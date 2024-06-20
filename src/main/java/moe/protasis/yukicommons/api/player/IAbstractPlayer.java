@@ -12,9 +12,9 @@ import java.util.UUID;
 public interface IAbstractPlayer extends IAbstractLivingEntity {
     UUID GetUuid();
     boolean IsSpigot();
-
     boolean IsOnline();
     double GetHealth();
+    void SendMessage(String msg);
 
     default Player GetBukkitPlayer() {
         return Bukkit.getPlayer(GetUuid());

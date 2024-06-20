@@ -36,4 +36,9 @@ public class BukkitPlayerWrapper implements IAbstractPlayer {
     public double GetHealth() {
         return player.getHealth();
     }
+
+    @Override
+    public void SendMessage(String msg) {
+        player.sendMessage(msg);
+    }
 }

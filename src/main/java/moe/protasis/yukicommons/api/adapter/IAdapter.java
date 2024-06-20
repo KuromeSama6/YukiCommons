@@ -4,10 +4,12 @@ import moe.protasis.yukicommons.YukiCommons;
 import moe.protasis.yukicommons.YukiCommonsBungee;
 import moe.protasis.yukicommons.api.adapter.impl.BukkitAdapter;
 import moe.protasis.yukicommons.api.adapter.impl.BungeecordAdapter;
+import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 
 public interface IAdapter {
-    IAbstractPlayer Adapt(Object obj);
+    IAbstractPlayer AdaptToPlayer(Object obj);
+    IAbstractCommandExecutor AdaptToCommandExecutor(Object obj);
 
     static IAdapter Get() {
         if (YukiCommons.getInstance() != null) return new BukkitAdapter();

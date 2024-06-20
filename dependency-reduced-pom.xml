@@ -67,6 +67,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.10.2</version>
+      <type>javadoc</type>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-api</artifactId>
       <version>1.19-R0.1-SNAPSHOT</version>
@@ -81,8 +88,8 @@
     </dependency>
   </dependencies>
   <properties>
-    <maven.compiler.target>8</maven.compiler.target>
-    <maven.compiler.source>8</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
   </properties>
 </project>

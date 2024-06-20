@@ -2,6 +2,8 @@ package moe.protasis.yukicommons;
 
 import lombok.Getter;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.command.CommandProvider;
+import moe.protasis.yukicommons.api.command.impl.BungeecordCommandProvider;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import net.md_5.bungee.api.ProxyServer;
@@ -26,6 +28,8 @@ public class YukiCommonsBungee extends Plugin implements Listener {
     public void onEnable() {
         instance = this;
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
+
+        new BungeecordCommandProvider();
     }
 
     @EventHandler
@@ -36,7 +40,7 @@ public class YukiCommonsBungee extends Plugin implements Listener {
 //                System.out.println(String.format("new class from auto register %s", clazz));
                 clazz
                         .getDeclaredConstructor(IAbstractPlayer.class)
-                        .newInstance(IAdapter.Get().Adapt(e.getPlayer()));
+                        .newInstance(IAdapter.Get().AdaptToPlayer(e.getPlayer()));
             } catch (Exception ex) {
                 getLogger().severe(String.format("An error occured while instantiating WrappedPlayer class %s:", clazz.getName()));
                 ex.printStackTrace();
