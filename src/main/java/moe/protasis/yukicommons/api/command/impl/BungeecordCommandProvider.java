@@ -1,8 +1,10 @@
 package moe.protasis.yukicommons.api.command.impl;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
 import moe.protasis.yukicommons.api.command.CommandProvider;
+import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.command.ICommandHandler;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import net.md_5.bungee.api.CommandSender;
@@ -32,12 +34,17 @@ public class BungeecordCommandProvider extends CommandProvider {
         @Override
         public void execute(CommandSender commandSender, String[] strings) {
             Object paramter = handler.CreateParameterObject();
-            JCommander.newBuilder()
-                    .addObject(paramter)
-                    .build()
-                    .parse(strings);
+            IAbstractCommandExecutor executor = IAdapter.Get().AdaptToCommandExecutor(commandSender);
+            try {
+                JCommander.newBuilder()
+                        .addObject(paramter)
+                        .build()
+                        .parse(strings);
+                handler.Handle(executor, paramter);
 
-            handler.Handle(IAdapter.Get().AdaptToCommandExecutor(commandSender), paramter);
+            } catch (ParameterException e) {
+                handler.OnError(executor, e);
+            }
         }
     }
 }

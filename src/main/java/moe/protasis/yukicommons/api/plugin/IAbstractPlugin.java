@@ -7,4 +7,5 @@ import java.util.logging.Logger;
 public interface IAbstractPlugin {
     IAbstractScheduler GetScheduler();
     Logger GetLogger();
+    ClassLoader GetClassLoader();
 }

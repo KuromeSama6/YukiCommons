@@ -1,9 +1,11 @@
 package moe.protasis.yukicommons.api.command.impl;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import lombok.AllArgsConstructor;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
 import moe.protasis.yukicommons.api.command.CommandProvider;
+import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.command.ICommandHandler;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import org.bukkit.command.Command;
@@ -22,6 +24,11 @@ public class BukkitCommandProvider extends CommandProvider {
 
         ICommandHandler<?> handler = (ICommandHandler<?>)clazz.getDeclaredConstructor().newInstance();
         PluginCommand command = ((JavaPlugin)plugin).getCommand(handler.GetName());
+        if (command == null) {
+            plugin.GetLogger().severe(String.format("Could not register handler for command %s because that command does not Exist! Check if you have it defined in your plugin.yml.", handler.GetName()));
+            return null;
+        }
+
         command.setAliases(Arrays.asList(handler.GetAliases()));
         command.setExecutor(new Handler(handler));
 
@@ -35,12 +42,18 @@ public class BukkitCommandProvider extends CommandProvider {
         @Override
         public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
             Object paramter = handler.CreateParameterObject();
-            JCommander.newBuilder()
-                    .addObject(paramter)
-                    .build()
-                    .parse(strings);
+            IAbstractCommandExecutor executor = IAdapter.Get().AdaptToCommandExecutor(commandSender);
+            try {
+                JCommander.newBuilder()
+                        .addObject(paramter)
+                        .build()
+                        .parse(strings);
+                handler.Handle(executor, paramter);
 
-            handler.Handle(IAdapter.Get().AdaptToCommandExecutor(commandSender), paramter);
+            } catch (ParameterException e) {
+                handler.OnError(executor, e);
+            }
+
             return true;
         }
     }

@@ -1,10 +1,13 @@
 package moe.protasis.yukicommons.api.player;
 
 import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.player.impl.BukkitPlayerWrapper;
+import moe.protasis.yukicommons.api.player.impl.PendingPlayerWrapper;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.api.data.IDatabaseProvider;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
+import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,10 +56,6 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
 
         if (!players.containsKey(getClass())) players.put(getClass(), new HashMap<>());
         players.get(getClass()).put(uuid, this);
-
-        GetPlugin().GetScheduler().RunAsync(() -> {
-            dataReady = LoadData();
-        });
     }
 
     /**
@@ -88,7 +87,24 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         });
     }
 
+    public void BlockingLoadData() {
+        if (dataReady) throw new IllegalStateException();
+        if (ShouldLoadAsync()) {
+            GetPlugin().GetScheduler().RunAsync(() -> dataReady = LoadData());
+        } else {
+            dataReady = LoadData();
+        }
+    }
+    public void AttemptLogin() {
+    }
+
     protected abstract boolean LoadData();
+
+    /**
+     * @return Whether the <code>LoadData</code> method of this class should
+     * be called asynchronously.
+     */
+    protected abstract boolean ShouldLoadAsync();
 
     /**
      * @return The plugin class from which this WrappedPlayer originated.
@@ -113,7 +129,10 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * then removes it from the player list.
      */
     public void Destroy() {
-        if (dataReady) {
+        Destroy(true);
+    }
+    public void Destroy(boolean save) {
+        if (dataReady && save) {
             GetPlugin().GetScheduler().RunAsync(() -> {
                 Save();
                 for (PlayerComponent<?> component : components.values()) {
@@ -127,6 +146,19 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
             });
         }
         players.get(getClass()).remove(uuid);
+    }
+
+    public void FinalizeConnection(IAbstractPlayer player) {
+        if (!(this.player instanceof PendingPlayerWrapper)) throw new IllegalStateException();
+        this.player = player;
+    }
+
+    /**
+     * Utility method to run a <code>Runnable</code> on the plugin's main thread.
+     * @param runnable The runnable.
+     */
+    protected final void RunOnMain(Runnable runnable) {
+        GetPlugin().GetScheduler().ScheduleSyncDelayedTask(runnable, 0);
     }
 
     public <T extends WrappedPlayer> T GetPlayer(Class<T> clazz) {
@@ -148,5 +180,13 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         return players.get(clazz).values().stream()
                 .map(c -> (T)c)
                 .collect(Collectors.toList());
+    }
+
+    public static void DestroyAll(UUID uuid) {
+        for (Map<UUID, WrappedPlayer> map : players.values()) {
+            if (map.containsKey(uuid))  {
+                map.get(uuid).Destroy();
+            }
+        }
     }
 }

@@ -67,9 +67,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>0.10.2</version>
+      <groupId>io.github.classgraph</groupId>
+      <artifactId>classgraph</artifactId>
+      <version>4.8.174</version>
       <type>javadoc</type>
       <scope>compile</scope>
     </dependency>
@@ -84,6 +84,12 @@
       <artifactId>bungeecord-api</artifactId>
       <version>1.19-R0.1-SNAPSHOT</version>
       <type>javadoc</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bukkit</groupId>
+      <artifactId>craftbukkit</artifactId>
+      <version>1.12.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

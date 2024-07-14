@@ -42,4 +42,9 @@ public class BungeecordPlayerWrapper implements IAbstractPlayer {
     public String GetName() {
         return player.getName();
     }
+
+    @Override
+    public ProxiedPlayer GetProxyPlayer() {
+        return player;
+    }
 }

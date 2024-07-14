@@ -3,47 +3,41 @@ package moe.protasis.yukicommons.api.player.impl;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
-import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
 @AllArgsConstructor
-public class BukkitPlayerWrapper implements IAbstractPlayer {
+public class PendingPlayerWrapper implements IAbstractPlayer {
     @Getter
-    private final Player player;
+    private final UUID player;
 
     @Override
     public UUID GetUuid() {
-        return player.getUniqueId();
+        return player;
     }
 
     @Override
     public boolean IsSpigot() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean IsOnline() {
-        return player.isOnline();
-    }
-
-    @Override
-    public String GetName() {
-        return player.getName();
+        return false;
     }
 
     @Override
     public double GetHealth() {
-        return player.getHealth();
+        throw new IllegalStateException();
     }
 
     @Override
     public void SendMessage(String msg) {
-        player.sendMessage(msg);
+
     }
 
     @Override
-    public Player GetBukkitPlayer() {
-        return player;
+    public String GetName() {
+        return "";
     }
 }

@@ -1,11 +1,12 @@
 package moe.protasis.yukicommons.api.command;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import lombok.Getter;
 import lombok.var;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.util.Util;
-import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,24 +22,32 @@ public abstract class CommandProvider {
 
     }
 
-    public void RegisterCommands(IAbstractPlugin plugin) {
-        for (var clazz : new Reflections(ConfigurationBuilder.build(plugin.getClass().getPackage().getName()))
-                .getTypesAnnotatedWith(CommandHandler.class)) {
-            if (clazz.isAssignableFrom(ICommandHandler.class)) {
-                CommandHandler annotation = clazz.getAnnotation(CommandHandler.class);
-                if (annotation.platform() == CommandHandler.ExecutionPlatform.BOTH ||
-                        annotation.platform().getEnvironmentType() == Util.GetEnvironment()) {
-                    try {
-                        ICommandHandler<?> handler = RegisterCommand(clazz, plugin);
-                        plugin.GetLogger().info(String.format("Registered command %s", handler));
-                    } catch (Exception e) {
-                        plugin.GetLogger().severe(String.format("An error occured while registering command %s", clazz));
-                        e.printStackTrace();
+    public void RegisterCommands(IAbstractPlugin plugin, String pkg) {
+        try (
+                ScanResult result = new ClassGraph()
+//                        .verbose()
+                        .enableAllInfo()
+                        .acceptPackages(pkg)
+                        .scan();
+        ) {
+            for (ClassInfo info : result.getClassesWithAnnotation(CommandHandler.class)) {
+                Class<?> clazz = info.loadClass();
+                if (ICommandHandler.class.isAssignableFrom(clazz)) {
+                    CommandHandler annotation = clazz.getAnnotation(CommandHandler.class);
+                    if (annotation.platform() == CommandHandler.ExecutionPlatform.BOTH ||
+                            annotation.platform().getEnvironmentType() == Util.GetEnvironment()) {
+                        try {
+                            ICommandHandler<?> handler = RegisterCommand(clazz, plugin);
+                            if (handler != null) plugin.GetLogger().info(String.format("Registered command %s", handler.GetName()));
+                        } catch (Exception e) {
+                            plugin.GetLogger().severe(String.format("An error occured while registering command %s", clazz));
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-            } else {
-                plugin.GetLogger().warning(String.format("Could not register command %s because it does not extend ICommandHandler!", clazz));
+                } else {
+                    plugin.GetLogger().warning(String.format("Could not register command %s because it does not extend ICommandHandler!", clazz));
+                }
             }
         }
     }

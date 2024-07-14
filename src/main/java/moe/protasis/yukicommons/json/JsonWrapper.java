@@ -1,24 +1,42 @@
 package moe.protasis.yukicommons.json;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import lombok.Getter;
+import lombok.var;
+import moe.protasis.yukicommons.json.serializer.ItemStackSerializer;
+import moe.protasis.yukicommons.json.serializer.DateTimeSerializer;
+import moe.protasis.yukicommons.util.EnvironmentType;
+import moe.protasis.yukicommons.util.Util;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.inventory.ItemStack;
+import org.joda.time.DateTime;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class JsonWrapper {
     @Getter
     private final JsonObject json;
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     public JsonWrapper(JsonElement ele) {
         if (!ele.isJsonObject())
             throw new IllegalArgumentException("Argument must be a JsonObject!");
 
         json = ele.getAsJsonObject();
+
+        var builder = new GsonBuilder()
+                .registerTypeAdapter(DateTime.class, new DateTimeSerializer());
+        if (Util.GetEnvironment() == EnvironmentType.SPIGOT) {
+            builder.registerTypeAdapter(ItemStack.class, new ItemStackSerializer());
+        }
+
+        gson = builder.create();
     }
 
     public JsonWrapper() {
@@ -87,11 +105,16 @@ public class JsonWrapper {
         return ret;
     }
 
+    public JsonArray GetList(String path) {
+        JsonElement ele = ResolvePath(path);
+        return ele != null && ele.isJsonArray() ? ele.getAsJsonArray() : null;
+    }
+
     public <T> T GetObject(String path, Class<T> clazz) {
         JsonElement ret = ResolvePath(path);
         if (ret == null || ret.equals(JsonNull.INSTANCE)) return null;
 
-        return gson.fromJson(ret, clazz);
+        return gson.fromJson(ret.toString(), clazz);
     }
 
     public JsonWrapper GetObject(String path) {
@@ -131,6 +154,10 @@ public class JsonWrapper {
         return this;
     }
 
+    public JsonWrapper SetObject(String path, Object obj) {
+        return Set(path, gson.toJsonTree(obj));
+    }
+
     public void Save(File file) {
         try (FileWriter writer = new FileWriter(file)){
             file.getParentFile().mkdirs();
@@ -144,7 +171,7 @@ public class JsonWrapper {
     }
 
     private void Set(String name, JsonObject parent, Object obj) {
-        if (obj == null) {
+        if (obj == null || obj instanceof JsonNull) {
             parent.remove(name);
 
         } else if (obj instanceof JsonElement) {
@@ -168,7 +195,16 @@ public class JsonWrapper {
         } else if (obj instanceof IJsonSerializable) {
             parent.add(name, gson.toJsonTree(obj));
 
-        } else parent.addProperty(name, obj.toString());
+        } else if (Util.GetEnvironment() == EnvironmentType.SPIGOT && obj instanceof ItemStack) {
+            parent.add(name, gson.toJsonTree(obj, ItemStack.class));
+
+        }
+
+        else if (obj instanceof Number) parent.addProperty(name, (Number)obj);
+        else if (obj instanceof Boolean) parent.addProperty(name, (Boolean)obj);
+        else if (obj instanceof Character) parent.addProperty(name, (Character)obj);
+
+        else parent.addProperty(name, obj.toString());
     }
 
     private JsonElement ResolvePath(String path) {
