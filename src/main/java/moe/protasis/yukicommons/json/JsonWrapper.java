@@ -54,6 +54,13 @@ public class JsonWrapper {
         return GetString(path, null);
     }
 
+    public <T extends Enum<T>> T GetEnum(Class<T> clazz, String path, T def) {
+        String str = GetString(path, def.toString());
+        if (str == null) return null;
+
+        return T.valueOf(clazz, str);
+    }
+
     public int GetInt(String path, int def) {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isNumber() ? ret.getAsInt() : def;
@@ -119,7 +126,7 @@ public class JsonWrapper {
 
     public JsonWrapper GetObject(String path) {
         JsonElement ret = ResolvePath(path);
-        if (ret == null || !ret.isJsonObject()) return null;
+        if (ret == null || !ret.isJsonObject()) return new JsonWrapper();
         return new JsonWrapper(ret.getAsJsonObject());
     }
 
@@ -198,6 +205,8 @@ public class JsonWrapper {
         } else if (Util.GetEnvironment() == EnvironmentType.SPIGOT && obj instanceof ItemStack) {
             parent.add(name, gson.toJsonTree(obj, ItemStack.class));
 
+        } else if (obj instanceof Enum<?>) {
+            parent.addProperty(name, obj.toString());
         }
 
         else if (obj instanceof Number) parent.addProperty(name, (Number)obj);
