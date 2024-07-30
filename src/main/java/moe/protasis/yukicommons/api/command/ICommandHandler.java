@@ -6,20 +6,59 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+/**
+ * Interface for any command handlers to implement.
+ * 
+ * @param T The type of parameters used for this handler.
+ */
 public interface ICommandHandler<T> {
+    /**
+     * Called when a command is to be handled by this handler.
+     * This method is to be implemented by the developer.
+     * 
+     * @param executor The command executor.
+     * @param args     The parameter.
+     */
     void HandleInternal(IAbstractCommandExecutor executor, T args);
+
+    /**
+     * Gets the name of this handler. This is usually the command itself.
+     * 
+     * @return The name.
+     */
     String GetName();
+
+    /**
+     * Gets any aliases of this handler, apart from its name.
+     * 
+     * @return This command handler's aliases.
+     */
     String[] GetAliases();
 
+    /**
+     * Gets the permission required in order to execute this command.
+     * 
+     * @return The permission. <code>null</code> if no permission is required.
+     */
     default String GetPermission() {
         return null;
     }
+
     default void Handle(IAbstractCommandExecutor executor, Object args) {
-        HandleInternal(executor, (T)args);
+        HandleInternal(executor, (T) args);
     }
+
+    /**
+     * Called when an <code>ParamterException</code> is thrown whilst executing this
+     * command, oftentimes caused by one or more illegal paramters.
+     * 
+     * @param executor The executor of the command.
+     * @param e        The exception.
+     */
     default void OnError(IAbstractCommandExecutor executor, ParameterException e) {
         executor.SendMessage(String.format("The command was not executed correctly: %s", e.getMessage()));
     }
+
     default T CreateParameterObject() {
         try {
             // Get the actual type argument T from the handler's class hierarchy
