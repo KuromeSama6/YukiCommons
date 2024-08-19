@@ -6,8 +6,11 @@ import lombok.Getter;
 import lombok.var;
 import moe.protasis.yukicommons.json.serializer.ItemStackSerializer;
 import moe.protasis.yukicommons.json.serializer.DateTimeSerializer;
+import moe.protasis.yukicommons.json.serializer.LocationSerializer;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import moe.protasis.yukicommons.util.Util;
+import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 import org.joda.time.DateTime;
@@ -34,6 +37,7 @@ public class JsonWrapper {
                 .registerTypeAdapter(DateTime.class, new DateTimeSerializer());
         if (Util.GetEnvironment() == EnvironmentType.SPIGOT) {
             builder.registerTypeAdapter(ItemStack.class, new ItemStackSerializer());
+            builder.registerTypeAdapter(Location.class, new LocationSerializer());
         }
 
         gson = builder.create();
@@ -114,7 +118,7 @@ public class JsonWrapper {
 
     public JsonArray GetList(String path) {
         JsonElement ele = ResolvePath(path);
-        return ele != null && ele.isJsonArray() ? ele.getAsJsonArray() : null;
+        return ele != null && ele.isJsonArray() ? ele.getAsJsonArray() : new JsonArray();
     }
 
     public <T> T GetObject(String path, Class<T> clazz) {
@@ -180,39 +184,34 @@ public class JsonWrapper {
     private void Set(String name, JsonObject parent, Object obj) {
         if (obj == null || obj instanceof JsonNull) {
             parent.remove(name);
-
-        } else if (obj instanceof JsonElement) {
+        }
+        else if (obj instanceof Number) parent.addProperty(name, (Number)obj);
+        else if (obj instanceof Boolean) parent.addProperty(name, (Boolean)obj);
+        else if (obj instanceof Character) parent.addProperty(name, (Character)obj);
+        else if (obj instanceof JsonElement) {
             parent.add(name, (JsonElement)obj);
-
         } else if (obj instanceof Map) {
             JsonObject data = new JsonObject();
             for (Map.Entry<?, ?> entry : ((Map<?, ?>)obj).entrySet()) {
                 Set(Objects.toString(entry.getKey()), data, entry.getValue());
             }
-
             parent.add(name, data);
-
         } else if (obj instanceof List) {
             JsonArray arr = new JsonArray();
             for (Object o : (List<?>)obj) {
                 arr.add(gson.toJsonTree(o));
             }
             parent.add(name, arr);
-
         } else if (obj instanceof IJsonSerializable) {
             parent.add(name, gson.toJsonTree(obj));
-
         } else if (Util.GetEnvironment() == EnvironmentType.SPIGOT && obj instanceof ItemStack) {
             parent.add(name, gson.toJsonTree(obj, ItemStack.class));
-
+        } else if (Util.GetEnvironment() == EnvironmentType.SPIGOT && obj instanceof Location) {
+            parent.add(name, gson.toJsonTree(obj, Location.class));
         } else if (obj instanceof Enum<?>) {
             parent.addProperty(name, obj.toString());
         }
-
-        else if (obj instanceof Number) parent.addProperty(name, (Number)obj);
-        else if (obj instanceof Boolean) parent.addProperty(name, (Boolean)obj);
-        else if (obj instanceof Character) parent.addProperty(name, (Character)obj);
-
+        else if (obj instanceof JsonWrapper) parent.add(name, ((JsonWrapper)obj).json);
         else parent.addProperty(name, obj.toString());
     }
 
@@ -237,4 +236,34 @@ public class JsonWrapper {
     public String toString() {
         return json.toString();
     }
+
+    public static JsonWrapper FromYaml(ConfigurationSection sec) {
+        if (Util.GetEnvironment() != EnvironmentType.SPIGOT)
+            throw new IllegalStateException("This method is only callable on Spigot.");
+        JsonWrapper ret = new JsonWrapper();
+//        System.out.println("start");
+
+        for (String key : sec.getKeys(false)) {
+//            System.out.println(String.format("key: %s", sec.get(key)));
+
+            if (sec.isConfigurationSection(key)) {
+//                System.out.println("config section");
+                ret.Set(key, FromYaml(sec.getConfigurationSection(key)));
+            }
+            else if (sec.isList(key)){
+//                System.out.println("list");
+                ret.Set(key, sec.getList(key));
+            }
+            else {
+//                System.out.println(String.format("primitive %s", sec.get(key).getClass()));
+                ret.Set(key, sec.get(key));
+            }
+
+//            System.out.println(ret);
+        }
+
+//        System.out.println("finished");
+        return ret;
+    }
+
 }

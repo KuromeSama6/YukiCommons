@@ -5,8 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.experimental.UtilityClass;
+import lombok.var;
 import moe.protasis.yukicommons.json.JsonWrapper;
 import moe.protasis.yukicommons.json.serializer.DateTimeSerializer;
+import moe.protasis.yukicommons.json.serializer.ItemStackSerializer;
+import org.bukkit.inventory.ItemStack;
 import org.joda.time.DateTime;
 
 import java.io.File;
@@ -56,6 +59,17 @@ public class JsonUtil {
             if (ele == null) current.Set(key, defEle);
             else if (defEle.isJsonObject() && ele.isJsonObject()) UpdateJson(new JsonWrapper(ele.getAsJsonObject()), new JsonWrapper(defEle.getAsJsonObject()));
         }
+    }
+
+    public static JsonWrapper SerializeItemstack(Object obj) {
+        if (Util.GetEnvironment() != EnvironmentType.SPIGOT)
+            throw new IllegalStateException("Not callable on proxy.");
+        ItemStack item = (ItemStack)obj;
+        var ret = new GsonBuilder()
+                .registerTypeAdapter(ItemStack.class, new ItemStackSerializer())
+                .create()
+                .toJson(item);
+        return new JsonWrapper(ret);
     }
 
 }

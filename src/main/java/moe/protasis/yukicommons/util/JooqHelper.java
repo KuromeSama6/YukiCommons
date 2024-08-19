@@ -72,7 +72,7 @@ public class JooqHelper {
         try {
 
             List<Field<?>> fields = new ArrayList<>();
-            List<IValueSerializer<?, ?>> values = new ArrayList<>();
+            List<Object> values = new ArrayList<>();
 
             Class<?> clazz = obj.getClass();
             boolean isGlobal = clazz.isAnnotationPresent(DatabaseObject.class);
@@ -83,11 +83,12 @@ public class JooqHelper {
 
                     IValueSerializer<?, ?> serializer = GetSerializer(field);
                     fields.add(DSL.field(name));
-                    values.add(serializer);
+
+                    values.add(serializer.Serialize(field, field.get(obj)));
                 }
             }
 
-            return new Data(fields.toArray(new Field<?>[0]), values.toArray(new IValueSerializer[0]));
+            return new Data(fields.toArray(new Field<?>[0]), values.toArray(new Object[0]));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -112,10 +113,10 @@ public class JooqHelper {
         return serializer;
     }
 
-    private static class Data extends Pair<Field<?>[], IValueSerializer<?, ?>[]> {
+    private static class Data extends Pair<Field<?>[], Object[]> {
 
-        public Data(Field<?>[] fields, IValueSerializer<?, ?>[] iValueSerializers) {
-            super(fields, iValueSerializers);
+        public Data(Field<?>[] fields, Object[] values) {
+            super(fields, values);
         }
     }
 }

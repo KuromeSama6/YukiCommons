@@ -3,10 +3,14 @@ package moe.protasis.yukicommons.api.command.impl;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import lombok.AllArgsConstructor;
+import moe.protasis.yukicommons.YukiCommons;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
 import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.command.ICommandHandler;
+import moe.protasis.yukicommons.api.exception.command.CommandExecutionException;
+import moe.protasis.yukicommons.api.exception.command.InvalidCommandException;
+import moe.protasis.yukicommons.api.exception.command.PermissionDeniedException;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -52,6 +56,22 @@ public class BukkitCommandProvider extends CommandProvider {
 
             } catch (ParameterException e) {
                 handler.OnError(executor, e);
+
+            } catch (InvalidCommandException e) {
+              commandSender.sendMessage(e.getMessage());
+
+            } catch (PermissionDeniedException e) {
+                commandSender.sendMessage("Permission denied");
+
+                YukiCommons.getInstance().getLogger().warning(String.format("Permission denied for %s whilst executing command %s %s:", commandSender.getName(),
+                        s, Arrays.toString(strings)));
+                e.printStackTrace();
+
+            } catch (CommandExecutionException e) {
+                commandSender.sendMessage("The command was not executed correctly.");
+                YukiCommons.getInstance().getLogger().severe(String.format("Error for %s whilst executing command %s %s:", commandSender.getName(),
+                        s, Arrays.toString(strings)));
+                e.printStackTrace();
             }
 
             return true;
