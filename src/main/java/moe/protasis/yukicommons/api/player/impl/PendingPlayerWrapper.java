@@ -37,6 +37,11 @@ public class PendingPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public boolean HasPermission(String perm) {
+        return false;
+    }
+
+    @Override
     public String GetName() {
         return "";
     }

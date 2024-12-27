@@ -1,12 +1,6 @@
 package moe.protasis.yukicommons.api.player;
 
 import lombok.Getter;
-import org.jooq.InsertSetStep;
-import org.jooq.Record;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
-
-import java.util.List;
 
 /**
  * Represents a component of a player. A single player may only have one
@@ -16,7 +10,7 @@ import java.util.List;
  * developer may choose to make these two items player components, by extending
  * the <code>PlayerComponent</code> class.
  * 
- * @param T The type of this component's owner.
+ * @param <T> The type of this component's owner.
  */
 public abstract class PlayerComponent<T extends WrappedPlayer> {
     /**
@@ -34,12 +28,17 @@ public abstract class PlayerComponent<T extends WrappedPlayer> {
      * for instance, from a database. It is advised to perform database query logic
      * in a blocking fashion in this method.
      */
-    protected abstract void LoadData();
+    protected void LoadData() {}
 
     /**
      * ASYNC. Called when this component is to have its data saved, for instance, to
      * a database. It is advised to perform database query logic in a blocking
      * fashion in this method.
      */
-    protected abstract void Save();
+    protected void Save() {}
+
+    public void Update() {}
+    public EntityLoadType GetLoadType() {
+        return EntityLoadType.REGULAR;
+    }
 }

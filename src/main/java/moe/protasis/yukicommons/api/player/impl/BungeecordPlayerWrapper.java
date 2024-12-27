@@ -44,6 +44,11 @@ public class BungeecordPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public boolean HasPermission(String perm) {
+        return player.hasPermission(perm);
+    }
+
+    @Override
     public ProxiedPlayer GetProxyPlayer() {
         return player;
     }

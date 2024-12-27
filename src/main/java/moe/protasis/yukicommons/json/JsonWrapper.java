@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.var;
 import moe.protasis.yukicommons.json.serializer.ItemStackSerializer;
 import moe.protasis.yukicommons.json.serializer.DateTimeSerializer;
+import moe.protasis.yukicommons.json.serializer.JsonWrapperSerializer;
 import moe.protasis.yukicommons.json.serializer.LocationSerializer;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import moe.protasis.yukicommons.util.Util;
@@ -33,21 +34,14 @@ public class JsonWrapper {
 
         json = ele.getAsJsonObject();
 
-        var builder = new GsonBuilder()
-                .registerTypeAdapter(DateTime.class, new DateTimeSerializer());
-        if (Util.GetEnvironment() == EnvironmentType.SPIGOT) {
-            builder.registerTypeAdapter(ItemStack.class, new ItemStackSerializer());
-            builder.registerTypeAdapter(Location.class, new LocationSerializer());
-        }
-
-        gson = builder.create();
+        gson = GetBuilder().create();
     }
 
     public JsonWrapper() {
         this(new JsonObject());
     }
     public JsonWrapper(String str) {
-        this(new Gson().fromJson(str, JsonObject.class));
+        this(GetBuilder().create().fromJson(str, JsonObject.class));
     }
 
     public String GetString(String path, String def) {
@@ -138,6 +132,18 @@ public class JsonWrapper {
         return ResolvePath(path);
     }
 
+    public List<JsonWrapper> GetObjectList(String path) {
+        List<JsonWrapper> ret = new ArrayList<>();
+        JsonElement node = ResolvePath(path);
+        if (node == null || !node.isJsonArray()) return ret;
+
+        for (var jsonElement : node.getAsJsonArray()) {
+            ret.add(new JsonWrapper(jsonElement));
+        }
+
+        return ret;
+    }
+
     public List<String> GetKeys() {
         return json.entrySet().stream()
                 .map(Map.Entry::getKey)
@@ -145,6 +151,19 @@ public class JsonWrapper {
     }
     public boolean Has(String path) {
         return ResolvePath(path) != null;
+    }
+
+    public JsonWrapper Merge(String path, JsonWrapper other) {
+        JsonElement ret = ResolvePath(path);
+        if (ret == null || !ret.isJsonObject())
+            throw new IllegalArgumentException("Path must be a JsonObject!");
+
+        var json = ret == this.json ? this : new JsonWrapper(ret);
+        for (var key : other.GetKeys()) {
+            json.Set(key, other.Get(key));
+        }
+
+        return this;
     }
 
     public JsonWrapper Set(String path, Object obj) {
@@ -170,8 +189,8 @@ public class JsonWrapper {
     }
 
     public void Save(File file) {
+        file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file)){
-            file.getParentFile().mkdirs();
             new GsonBuilder()
                     .setPrettyPrinting()
                     .create()
@@ -216,6 +235,7 @@ public class JsonWrapper {
     }
 
     private JsonElement ResolvePath(String path) {
+        if (path.isEmpty()) return json;
         String[] args = path.split("\\.");
         if (args.length == 0) return json;
 
@@ -235,6 +255,19 @@ public class JsonWrapper {
     @Override
     public String toString() {
         return json.toString();
+    }
+
+    public static GsonBuilder GetBuilder() {
+        var builder = new GsonBuilder()
+                .disableHtmlEscaping()
+                .registerTypeAdapter(DateTime.class, new DateTimeSerializer());
+        if (Util.GetEnvironment() == EnvironmentType.SPIGOT) {
+            builder.registerTypeAdapter(ItemStack.class, new ItemStackSerializer());
+            builder.registerTypeAdapter(Location.class, new LocationSerializer());
+            builder.registerTypeAdapter(JsonWrapper.class, new JsonWrapperSerializer());
+        }
+
+        return builder;
     }
 
     public static JsonWrapper FromYaml(ConfigurationSection sec) {

@@ -3,15 +3,18 @@ package moe.protasis.yukicommons.api.command.impl;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import lombok.AllArgsConstructor;
-import moe.protasis.yukicommons.YukiCommons;
+import moe.protasis.yukicommons.YukiCommonsBukkit;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
 import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.command.ICommandHandler;
 import moe.protasis.yukicommons.api.exception.command.CommandExecutionException;
 import moe.protasis.yukicommons.api.exception.command.InvalidCommandException;
+import moe.protasis.yukicommons.api.exception.command.OperationNotPermittedException;
 import moe.protasis.yukicommons.api.exception.command.PermissionDeniedException;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.apache.tools.ant.types.Commandline;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,32 +48,37 @@ public class BukkitCommandProvider extends CommandProvider {
 
         @Override
         public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-            Object paramter = handler.CreateParameterObject();
+            Object parameter = handler.CreateParameterObject();
             IAbstractCommandExecutor executor = IAdapter.Get().AdaptToCommandExecutor(commandSender);
             try {
                 JCommander.newBuilder()
-                        .addObject(paramter)
+                        .addObject(parameter)
                         .build()
-                        .parse(strings);
-                handler.Handle(executor, paramter);
+                        .parse(Commandline.translateCommandline(String.join(" ", strings)));
+                handler.Handle(executor, parameter);
 
             } catch (ParameterException e) {
                 handler.OnError(executor, e);
-
             } catch (InvalidCommandException e) {
               commandSender.sendMessage(e.getMessage());
+
+            } catch (OperationNotPermittedException e) {
+              commandSender.sendMessage("Operation not permitted");
 
             } catch (PermissionDeniedException e) {
                 commandSender.sendMessage("Permission denied");
 
-                YukiCommons.getInstance().getLogger().warning(String.format("Permission denied for %s whilst executing command %s %s:", commandSender.getName(),
+                YukiCommonsBukkit.getInstance().getLogger().warning(String.format("Permission denied for %s whilst executing command %s %s:", commandSender.getName(),
                         s, Arrays.toString(strings)));
                 e.printStackTrace();
 
             } catch (CommandExecutionException e) {
                 commandSender.sendMessage("The command was not executed correctly.");
-                YukiCommons.getInstance().getLogger().severe(String.format("Error for %s whilst executing command %s %s:", commandSender.getName(),
+                YukiCommonsBukkit.getInstance().getLogger().severe(String.format("Error for %s whilst executing command %s %s:", commandSender.getName(),
                         s, Arrays.toString(strings)));
+                e.printStackTrace();
+            } catch (Exception e) {
+                commandSender.sendMessage("The command was not executed correctly: An internal error occured while executing this command.");
                 e.printStackTrace();
             }
 

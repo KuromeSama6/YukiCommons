@@ -1,15 +1,15 @@
 package moe.protasis.yukicommons.api.player;
 
+import lombok.var;
 import moe.protasis.yukicommons.api.adapter.IAdapter;
-import moe.protasis.yukicommons.api.player.impl.BukkitPlayerWrapper;
 import moe.protasis.yukicommons.api.player.impl.PendingPlayerWrapper;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.api.data.IDatabaseProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
-import org.bukkit.Bukkit;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,6 +75,22 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         return (T) components.get(clazz);
     }
 
+    public <T extends PlayerComponent<?>> T GetOrCreateComponent(Class<T> clazz) {
+        var component = GetComponent(clazz);
+        if (component != null) return component;
+
+        try {
+            var obj = clazz.getDeclaredConstructor(getClass())
+                    .newInstance(this);
+            var ret = clazz.cast(obj);
+            AddComponent(ret);
+            return ret;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     /**
      * Adds a component to this player. Upon adding, the <code>LoadData</code>
      * method of the component
@@ -85,24 +101,39 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      */
     protected void AddComponent(PlayerComponent<?> component) {
         components.put(component.getClass(), component);
-        GetPlugin().GetScheduler().RunAsync(() -> {
-            try {
-                component.LoadData();
-            } catch (Exception e) {
-                GetPlugin().GetLogger().severe(String.format("Error loading component %s for player %s:",
-                        component.getClass(), player.GetName()));
-                e.printStackTrace();
-            }
-        });
+
+        switch (component.GetLoadType()) {
+            case BLOCKING:
+                BlockingLoadComponent(component);
+                break;
+            case PRIORITY:
+            case REGULAR:
+                GetPlugin().GetScheduler().RunAsync(() -> BlockingLoadComponent(component));
+                break;
+        }
+    }
+
+    private void BlockingLoadComponent(PlayerComponent<?> component) {
+        try {
+            component.LoadData();
+        } catch (Exception e) {
+            GetPlugin().GetLogger().severe(String.format("Error loading component %s for player %s:",
+                    component.getClass(), player.GetName()));
+            e.printStackTrace();
+        }
     }
 
     public void BlockingLoadData() {
         if (dataReady)
             throw new IllegalStateException();
-        if (ShouldLoadAsync()) {
-            GetPlugin().GetScheduler().RunAsync(() -> dataReady = LoadData());
-        } else {
-            dataReady = LoadData();
+        switch (GetLoadType()) {
+            case BLOCKING:
+                dataReady = LoadData();
+                break;
+            case PRIORITY:
+            case REGULAR:
+                GetPlugin().GetScheduler().RunAsync(() -> dataReady = LoadData());
+                break;
         }
     }
 
@@ -116,13 +147,21 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     public void AttemptLogin() throws LoginDeniedException {
     }
 
-    protected abstract boolean LoadData();
+    /**
+     * Loads the data for this WrappedPlayer object. It is not guaranteed that operations to the player object are safe, and thus such operations are not recommended.
+     * @return Whether the data was loaded successfully. Note that login rejections should be handled by the <code>AttemptLogin</code> method.
+     */
+    protected boolean LoadData() {
+        return true;
+    }
 
     /**
      * @return Whether the <code>LoadData</code> method of this class should
-     *         be called asynchronously.
+     *         be called asynchronously. Defaults to <code>true</code>.
      */
-    protected abstract boolean ShouldLoadAsync();
+    protected EntityLoadType GetLoadType() {
+        return EntityLoadType.REGULAR;
+    }
 
     /**
      * @return The plugin class from which this WrappedPlayer originated.
@@ -130,11 +169,11 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     protected abstract IAbstractPlugin GetPlugin();
 
     /**
-     * Saves this WrappedPlayer's data. Fails silently if <code>dataReady</code> is
+     * Saves this WrappedPlayer's data. The implementation should silently if <code>dataReady</code> is
      * false.
      * The behavior of this method should be <b>blocking</b>.
      */
-    public abstract void Save();
+    public void Save() {}
 
     /**
      * @return The <code>IDatabaseProvider</code> that this WrappedPlayer shall use
@@ -184,6 +223,27 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         GetPlugin().GetScheduler().ScheduleSyncDelayedTask(runnable, 0);
     }
 
+    /**
+     * Called every tick.
+     */
+    public void Update() {
+        for (var component : components.values()) {
+            component.Update();
+        }
+    }
+
+    /**
+     * Called after the player has joined the server, and operations to the player object are safe.
+     * On Bukkit, this is called after the <code>PlayerJoinEvent</code> is fired.
+     * On BungeeCord, this is called after the <code>PostLoginEvent</code> is fired and <code>FinalizeConnection</code> is called on the wrapped player.
+     */
+    public void OnJoin() {}
+
+    /**
+     * Called after ALL WrappedPlayer instances registered by every plugin have been initialized.
+     */
+    public void OnPostInit() {}
+
     public <T extends WrappedPlayer> T GetPlayer(Class<T> clazz) {
         return GetPlayer(uuid, clazz);
     }
@@ -203,7 +263,14 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         return GetPlayer(abstractPlayer.GetUuid(), clazz);
     }
 
-    public static <T extends WrappedPlayer> List<T> GetPlayers(Class<T> clazz) {
+    public static <T extends WrappedPlayer> List<T> GetAllPlayers() {
+        return players.values().stream()
+                .flatMap(c -> c.values().stream())
+                .map(c -> (T) c)
+                .collect(Collectors.toList());
+    }
+
+    public static <T extends WrappedPlayer> List<T> GetAllPlayers(Class<T> clazz) {
         return players.get(clazz).values().stream()
                 .map(c -> (T) c)
                 .collect(Collectors.toList());

@@ -1,7 +1,5 @@
 package moe.protasis.yukicommons.api.adapter;
 
-import moe.protasis.yukicommons.YukiCommons;
-import moe.protasis.yukicommons.YukiCommonsBungee;
 import moe.protasis.yukicommons.api.adapter.impl.BukkitAdapter;
 import moe.protasis.yukicommons.api.adapter.impl.BungeecordAdapter;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
@@ -18,7 +16,7 @@ import moe.protasis.yukicommons.util.Util;
 public interface IAdapter {
     /**
      * Returns an IAbstractPlayer representing the corresponding player.
-     * Supported objects are: Player, EntityEvent (whose Entity is a Player),
+     * Supported objects are: IAbstractPlayer, Player, EntityEvent (whose Entity is a Player),
      * PlayerEvent, UUID (given that player is online), ProxiedPlayer,
      * PendingConnection.
      * 
@@ -31,7 +29,7 @@ public interface IAdapter {
     /**
      * Returns an IAbstractCommandExecutor representing the corresponding command
      * executor.
-     * Supported objects are: ConsoleCommandSender, Player, ProxiedPlayer,
+     * Supported objects are: IAbstractPlayer, ConsoleCommandSender, Player, ProxiedPlayer,
      * Bungeecord's console command executor obtained via
      * <code>ProxyServer.getInstance().getConsole()</code>.
      * 

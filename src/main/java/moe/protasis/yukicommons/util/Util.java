@@ -1,8 +1,8 @@
 package moe.protasis.yukicommons.util;
 
 import lombok.experimental.UtilityClass;
-import moe.protasis.yukicommons.YukiCommons;
 import moe.protasis.yukicommons.YukiCommonsBungee;
+import moe.protasis.yukicommons.api.IYukiCommonsApi;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,6 +44,14 @@ public class Util {
             else return EnvironmentType.SPIGOT;
         } catch (NoClassDefFoundError e) {
             return EnvironmentType.SPIGOT;
+        }
+    }
+
+    public static void SafeCall(Runnable func) {
+        try {
+            func.run();
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 }

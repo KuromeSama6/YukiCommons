@@ -1,6 +1,6 @@
 package moe.protasis.yukicommons.nms;
 
-import moe.protasis.yukicommons.YukiCommons;
+import moe.protasis.yukicommons.YukiCommonsBukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,8 +16,7 @@ public interface IVersionAdaptor {
                     .newInstance();
 
         } catch (Exception e) {
-            YukiCommons.getInstance().getLogger().severe("An error occured while acquiring a version adaptor. This may not be a error," +
-                    "this may simply mean that YukiCommons is not yet supported on this version.");
+            YukiCommonsBukkit.getInstance().getLogger().severe("An error occured while acquiring a version adaptor. This may not be a error, this may simply mean that YukiCommons is not yet supported on this version.");
             e.printStackTrace();
             return null;
         }

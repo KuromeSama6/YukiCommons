@@ -1,22 +1,21 @@
 package moe.protasis.yukicommons;
 
 import lombok.Getter;
-import moe.protasis.yukicommons.api.adapter.IAdapter;
-import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.command.impl.BukkitCommandProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
+import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.player.impl.BukkitPlayerWrapper;
 import moe.protasis.yukicommons.api.player.impl.PendingPlayerWrapper;
 import moe.protasis.yukicommons.nms.IVersionAdaptor;
-import net.md_5.bungee.api.chat.TextComponent;
+import moe.protasis.yukicommons.util.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,13 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class YukiCommons extends JavaPlugin implements Listener {
+public class YukiCommonsBukkit extends JavaPlugin implements Listener {
     @Getter
-    private static YukiCommons instance;
-    @Getter
-    private final List<Class<? extends WrappedPlayer>> autoRegisters = new ArrayList<>();
+    private static YukiCommonsBukkit instance;
     @Getter
     private IVersionAdaptor versionAdaptor;
+    @Getter
+    private final List<AutoPlayerLoadData> autoPlayerLoadData = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -40,12 +39,25 @@ public class YukiCommons extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         versionAdaptor = IVersionAdaptor.Get();
         new BukkitCommandProvider();
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, this::OnTick, 0, 1);
     }
+
+    public void OnTick() {
+        WrappedPlayer.GetAllPlayers().forEach(c -> {
+            if (c.GetPlayer().GetBukkitPlayer() != null) {
+                Util.SafeCall(c::Update);
+            }
+        });
+    }
+
 
     @EventHandler
     private void OnPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         // auto registers
-        for (Class<? extends WrappedPlayer> clazz : YukiCommons.getInstance().getAutoRegisters()) {
+        for (AutoPlayerLoadData data : autoPlayerLoadData) {
+            Class<? extends WrappedPlayer> clazz = data.getPlayerClass();
+
             try {
 //                System.out.println(String.format("new class from auto register %s", clazz));
                 WrappedPlayer pl = clazz
@@ -65,6 +77,8 @@ public class YukiCommons extends JavaPlugin implements Listener {
                 ex.printStackTrace();
             }
         }
+
+        WrappedPlayer.GetAllPlayers().forEach(WrappedPlayer::OnPostInit);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -75,6 +89,16 @@ public class YukiCommons extends JavaPlugin implements Listener {
                 player.FinalizeConnection(new BukkitPlayerWrapper(e.getPlayer()));
             }
         }
+    }
+
+    @EventHandler
+    private void OnPlayerJoin(PlayerJoinEvent e) {
+        WrappedPlayer.getPlayers().values().forEach(map -> {
+            WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
+            if (player != null) {
+                Util.SafeCall(player::OnJoin);
+            }
+        });
     }
 
     @EventHandler

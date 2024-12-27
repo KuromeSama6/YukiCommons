@@ -1,6 +1,8 @@
 package moe.protasis.yukicommons.api.command;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import lombok.var;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
@@ -8,8 +10,8 @@ import java.lang.reflect.Type;
 
 /**
  * Interface for any command handlers to implement.
- * 
- * @param T The type of parameters used for this handler.
+ * @param <T> The type of parameters used for this handler.
+ *
  */
 public interface ICommandHandler<T> {
     /**
@@ -77,6 +79,15 @@ public interface ICommandHandler<T> {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create an instance of T", e);
         }
+    }
+
+    default void SendUsage(IAbstractCommandExecutor executor) {
+        var obj = JCommander.newBuilder()
+                .addObject(CreateParameterObject())
+                .build();
+        StringBuilder sb = new StringBuilder();
+        obj.usage(sb);
+        executor.SendMessage(sb.toString());
     }
 
     static Type FindParameterizedType(Class<?> clazz, Class<?> targetInterface) {

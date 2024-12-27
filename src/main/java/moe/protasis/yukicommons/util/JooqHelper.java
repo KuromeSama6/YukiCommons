@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import moe.protasis.yukicommons.api.jooq.DatabaseField;
 import moe.protasis.yukicommons.api.jooq.DatabaseObject;
 import moe.protasis.yukicommons.api.jooq.IValueSerializer;
+import moe.protasis.yukicommons.api.jooq.impl.CUIDSerializer;
 import moe.protasis.yukicommons.api.jooq.impl.DateTimeSerializer;
 import moe.protasis.yukicommons.api.jooq.impl.DefaultValueSerializer;
 import moe.protasis.yukicommons.api.jooq.impl.UUIDSerializer;
@@ -21,6 +22,7 @@ public class JooqHelper {
         valueSerializers = new HashMap<>();
         RegisterSerializer(UUID.class, new UUIDSerializer());
         RegisterSerializer(DateTime.class, new DateTimeSerializer());
+        RegisterSerializer(CUID.class, new CUIDSerializer());
     }
 
     public static void RegisterSerializer(Class<?> clazz, IValueSerializer<?, ?> serializer) {
@@ -29,7 +31,7 @@ public class JooqHelper {
 
     private Data data;
 
-    public InsertValuesStepN<?> PrepareInsertion(Object obj, InsertSetStep<Record> step) {
+    public InsertValuesStepN<?> PrepareInsertion(Object obj, InsertSetStep<org.jooq.Record> step) {
         data = Prepare(obj);
         return step
                 .columns(data.first)
@@ -45,7 +47,7 @@ public class JooqHelper {
         List<T> ret = new ArrayList<>();
 
         try {
-            for (Record row : res) {
+            for (org.jooq.Record row : res) {
                 Object obj = clazz.getDeclaredConstructor().newInstance();
                 boolean isGlobal = clazz.isAnnotationPresent(DatabaseObject.class);
 

@@ -43,6 +43,11 @@ public class BukkitPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public boolean HasPermission(String perm) {
+        return player.hasPermission(perm);
+    }
+
+    @Override
     public Player GetBukkitPlayer() {
         return player;
     }

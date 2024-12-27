@@ -8,4 +8,7 @@ public interface IAbstractPlugin {
     IAbstractScheduler GetScheduler();
     Logger GetLogger();
     ClassLoader GetClassLoader();
+    default Object GetPlugin() {
+        return this;
+    }
 }

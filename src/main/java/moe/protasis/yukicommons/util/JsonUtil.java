@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 import moe.protasis.yukicommons.json.JsonWrapper;
 import moe.protasis.yukicommons.json.serializer.DateTimeSerializer;
@@ -18,20 +19,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+@Slf4j
 @UtilityClass
 public class JsonUtil {
     public static JsonWrapper Read(File file) {
         if (!file.exists() || file.length() == 0) return new JsonWrapper(new JsonObject());
 
         try (FileReader reader = new FileReader(file)) {
-            return new JsonWrapper(new Gson().fromJson(reader, JsonObject.class));
+            return new JsonWrapper(JsonWrapper.GetBuilder().create().fromJson(reader, JsonObject.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static JsonWrapper UpdateAndWrite(File file, InputStream res) {
-        return UpdateAndWrite(file, new JsonWrapper(new Gson().fromJson(Util.ReadToStringAutoClose(res), JsonObject.class)));
+        return UpdateAndWrite(file, new JsonWrapper(JsonWrapper.GetBuilder().create().fromJson(Util.ReadToStringAutoClose(res), JsonObject.class)));
     }
 
     public static JsonWrapper UpdateAndWrite(File file, JsonWrapper def) {
@@ -61,15 +63,17 @@ public class JsonUtil {
         }
     }
 
-    public static JsonWrapper SerializeItemstack(Object obj) {
+    @Deprecated
+    public static String SerializeItemstack(Object obj) {
         if (Util.GetEnvironment() != EnvironmentType.SPIGOT)
             throw new IllegalStateException("Not callable on proxy.");
         ItemStack item = (ItemStack)obj;
         var ret = new GsonBuilder()
-                .registerTypeAdapter(ItemStack.class, new ItemStackSerializer())
+                .registerTypeHierarchyAdapter(ItemStack.class, new ItemStackSerializer())
                 .create()
-                .toJson(item);
-        return new JsonWrapper(ret);
+                .toJson(item, ItemStack.class);
+
+        return ret;
     }
 
 }

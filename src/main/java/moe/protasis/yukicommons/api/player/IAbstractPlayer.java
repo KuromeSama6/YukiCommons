@@ -39,6 +39,12 @@ public interface IAbstractPlayer extends IAbstractLivingEntity {
     void SendMessage(String msg);
 
     /**
+     * Checks if this player has a permission.
+     * @param perm The permission to check.
+     */
+    boolean HasPermission(String perm);
+
+    /**
      * @return The Bukkit Player instance represented by this player, or
      *         <code>null</code> if not running under Bukkit.
      */

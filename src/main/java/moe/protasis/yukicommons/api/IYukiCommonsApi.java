@@ -1,14 +1,12 @@
 package moe.protasis.yukicommons.api;
 
 import moe.protasis.yukicommons.api.command.CommandProvider;
-import moe.protasis.yukicommons.api.command.ICommandHandler;
 import moe.protasis.yukicommons.api.impl.YukiCommonsApiBukkit;
 import moe.protasis.yukicommons.api.impl.YukiCommonsApiBungeecord;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import moe.protasis.yukicommons.util.Util;
-import org.apache.commons.lang.NotImplementedException;
 
 /**
  * The main API class for YukiCommons.
@@ -17,11 +15,12 @@ public interface IYukiCommonsApi {
     /**
      * Register a WrappedPlayer class to be automatically instantiated when a player
      * logs in.
-     * 
-     * @param clazz The WrappedPlayer class. This class must have a constructor that
-     *              accepts a single IAbstractPlayer object.
+     *
+     * @param clazz  The WrappedPlayer class. This class must have a constructor that
+     *               accepts a single IAbstractPlayer object.
+     * @param plugin
      */
-    void AddAutoPlayerRegister(Class<? extends WrappedPlayer> clazz);
+    void AddAutoPlayerRegister(Class<? extends WrappedPlayer> clazz, IAbstractPlugin plugin);
 
     /**
      * Registers all command handlers (classes marked with CommandHandler) to the
