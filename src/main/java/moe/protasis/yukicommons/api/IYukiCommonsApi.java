@@ -8,6 +8,8 @@ import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import moe.protasis.yukicommons.util.Util;
 
+import java.util.logging.Logger;
+
 /**
  * The main API class for YukiCommons.
  */
@@ -21,6 +23,8 @@ public interface IYukiCommonsApi {
      * @param plugin
      */
     void AddAutoPlayerRegister(Class<? extends WrappedPlayer> clazz, IAbstractPlugin plugin);
+
+    Logger GetLogger();
 
     /**
      * Registers all command handlers (classes marked with CommandHandler) to the

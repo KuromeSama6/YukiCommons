@@ -52,6 +52,7 @@ public class BukkitCommandProvider extends CommandProvider {
             IAbstractCommandExecutor executor = IAdapter.Get().AdaptToCommandExecutor(commandSender);
             try {
                 JCommander.newBuilder()
+                        .expandAtSign(false)
                         .addObject(parameter)
                         .build()
                         .parse(Commandline.translateCommandline(String.join(" ", strings)));

@@ -94,6 +94,7 @@ public class JsonWrapper {
         String ret = GetString(path);
         return ret == null ? null : UUID.fromString(ret);
     }
+
     public <T> List<T> GetList(String path, Class<T> clazz) {
         List<T> ret = new ArrayList<>();
         JsonElement ele = ResolvePath(path);
@@ -102,6 +103,24 @@ public class JsonWrapper {
         for (JsonElement jsonElement : ele.getAsJsonArray()) {
             try {
                 ret.add(gson.fromJson(jsonElement, clazz));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return ret;
+    }
+
+    public <T extends Enum<T>> List<T> GetEnumList(String path, Class<T> clazz) {
+        List<T> ret = new ArrayList<>();
+        JsonElement ele = ResolvePath(path);
+        if (ele == null || !ele.isJsonArray()) return ret;
+
+        for (JsonElement jsonElement : ele.getAsJsonArray()) {
+            if (!jsonElement.isJsonPrimitive() || !jsonElement.getAsJsonPrimitive().isString()) continue;
+
+            try {
+                ret.add(Enum.valueOf(clazz, jsonElement.getAsString()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -222,7 +241,7 @@ public class JsonWrapper {
             }
             parent.add(name, arr);
         } else if (obj instanceof IJsonSerializable) {
-            parent.add(name, gson.toJsonTree(obj));
+            parent.add(name, ((IJsonSerializable)obj).Serialize());
         } else if (Util.GetEnvironment() == EnvironmentType.SPIGOT && obj instanceof ItemStack) {
             parent.add(name, gson.toJsonTree(obj, ItemStack.class));
         } else if (Util.GetEnvironment() == EnvironmentType.SPIGOT && obj instanceof Location) {
@@ -260,11 +279,12 @@ public class JsonWrapper {
     public static GsonBuilder GetBuilder() {
         var builder = new GsonBuilder()
                 .disableHtmlEscaping()
-                .registerTypeAdapter(DateTime.class, new DateTimeSerializer());
+                .registerTypeAdapter(DateTime.class, new DateTimeSerializer())
+                .registerTypeAdapter(JsonWrapper.class, new JsonWrapperSerializer());
+
         if (Util.GetEnvironment() == EnvironmentType.SPIGOT) {
             builder.registerTypeAdapter(ItemStack.class, new ItemStackSerializer());
             builder.registerTypeAdapter(Location.class, new LocationSerializer());
-            builder.registerTypeAdapter(JsonWrapper.class, new JsonWrapperSerializer());
         }
 
         return builder;

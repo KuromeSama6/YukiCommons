@@ -57,6 +57,10 @@ public abstract class AutoPlayerLoadData {
         if (method == null) return;
         try {
             WrappedPlayer wp = WrappedPlayer.GetPlayer(player, playerClass);
+            if (wp == null) {
+//                log.warn("CallEventMethod player is null!! abstractPlayer: {}, class: {}", player, playerClass);
+                return;
+            }
             method.invoke(wp, event);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);

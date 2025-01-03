@@ -42,4 +42,8 @@ public class PooledScheduler {
         handles.remove((Object)handle);
     }
 
+    public void RunAsync(Runnable func) {
+        scheduler.RunAsync(func);
+    }
+
 }

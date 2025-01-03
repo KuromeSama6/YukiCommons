@@ -11,6 +11,7 @@ import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public abstract class WrappedPlayer implements IWrappedPlayer {
     @Getter
-    private static final Map<Class<? extends WrappedPlayer>, Map<UUID, WrappedPlayer>> players = new HashMap<>();
+    private static final Map<Class<? extends WrappedPlayer>, Map<UUID, WrappedPlayer>> players = new ConcurrentHashMap<>();
 
     /**
      * The <code>Player</code> that is backing this <code>WrappedPlayer</code>
@@ -40,6 +41,11 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      */
     @Getter
     protected boolean dataReady;
+    /**
+     * Whether the async operations in any asynchronous login events has all been completed.
+     */
+    @Getter
+    protected boolean asyncLoginComplete;
     /**
      * The scheduler that this WrappedPlayer may use.
      */
@@ -116,6 +122,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     private void BlockingLoadComponent(PlayerComponent<?> component) {
         try {
             component.LoadData();
+            component.setDataReady(true);
         } catch (Exception e) {
             GetPlugin().GetLogger().severe(String.format("Error loading component %s for player %s:",
                     component.getClass(), player.GetName()));
@@ -188,6 +195,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      */
     public void Destroy() {
         Destroy(true);
+        scheduler.Free();
     }
 
     public void Destroy(boolean save) {
@@ -197,6 +205,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
                 for (PlayerComponent<?> component : components.values()) {
                     try {
                         component.Save();
+                        component.Destroy();
                     } catch (Exception e) {
                         GetPlugin().GetLogger().severe(String.format("Error saving component %s for player %s:",
                                 component.getClass(), player.GetName()));
@@ -237,7 +246,8 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * On Bukkit, this is called after the <code>PlayerJoinEvent</code> is fired.
      * On BungeeCord, this is called after the <code>PostLoginEvent</code> is fired and <code>FinalizeConnection</code> is called on the wrapped player.
      */
-    public void OnJoin() {}
+    public void OnJoin() {
+    }
 
     /**
      * Called after ALL WrappedPlayer instances registered by every plugin have been initialized.
@@ -249,17 +259,23 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     }
 
     public static <T extends IWrappedPlayer> T GetPlayer(UUID uuid, Class<T> clazz) {
-        if (!players.containsKey(clazz))
+        if (!players.containsKey(clazz)) {
+//            System.out.println("players does not contain key!");
             return null;
+        }
         return (T) players.get(clazz).get(uuid);
     }
 
     public static <T extends IWrappedPlayer> T GetPlayer(Object player, Class<T> clazz) {
-        if (player == null)
+        if (player == null){
+//            System.out.println("player is null!");
             return null;
+        }
         IAbstractPlayer abstractPlayer = IAdapter.Get().AdaptToPlayer(player);
-        if (abstractPlayer == null)
+        if (abstractPlayer == null){
+//            System.out.println("player abs is null!");
             return null;
+        }
         return GetPlayer(abstractPlayer.GetUuid(), clazz);
     }
 

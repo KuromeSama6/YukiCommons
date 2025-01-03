@@ -49,6 +49,7 @@ public class BungeecordCommandProvider extends CommandProvider {
 
             try {
                 var jCommander = JCommander.newBuilder()
+                        .expandAtSign(false)
                         .addObject(parameter)
                         .build();
 

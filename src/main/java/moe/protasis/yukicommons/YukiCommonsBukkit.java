@@ -54,17 +54,25 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener {
 
     @EventHandler
     private void OnPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+//        System.out.println(String.format("login started: %s", System.currentTimeMillis()));
+//        System.out.println(String.format("login next: %s", System.currentTimeMillis()));
+
         // auto registers
+//        System.out.println("player pre login");
         for (AutoPlayerLoadData data : autoPlayerLoadData) {
             Class<? extends WrappedPlayer> clazz = data.getPlayerClass();
 
             try {
 //                System.out.println(String.format("new class from auto register %s", clazz));
-                WrappedPlayer pl = clazz
-                        .getDeclaredConstructor(IAbstractPlayer.class)
-                        .newInstance(new PendingPlayerWrapper(e.getUniqueId()));
-                pl.BlockingLoadData();
-                pl.AttemptLogin();
+                synchronized (WrappedPlayer.getPlayers()) {
+                    WrappedPlayer pl = clazz
+                            .getDeclaredConstructor(IAbstractPlayer.class)
+                            .newInstance(new PendingPlayerWrapper(e.getUniqueId()));
+                    pl.BlockingLoadData();
+                    pl.AttemptLogin();
+                    e.allow();
+//                    System.out.println(String.format("login done: %s, %s", System.currentTimeMillis(), WrappedPlayer.GetPlayer(e.getUniqueId(), clazz)));
+                }
 
             } catch (LoginDeniedException ex) {
                 YukiCommonsBungee.getInstance().getLogger().warning(String.format("Login was denied by %s: %s", clazz, ex.getMessage()));
@@ -91,8 +99,9 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     private void OnPlayerJoin(PlayerJoinEvent e) {
+//        System.out.println(String.format("onjoin call started: %s", System.currentTimeMillis()));
         WrappedPlayer.getPlayers().values().forEach(map -> {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {

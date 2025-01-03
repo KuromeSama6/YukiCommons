@@ -10,6 +10,10 @@ import moe.protasis.yukicommons.api.player.impl.BukkitPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.player.PlayerEvent;
 
@@ -23,6 +27,10 @@ public class BukkitAdapter implements IAdapter {
         if (obj instanceof Player) return new BukkitPlayerWrapper((Player)obj);
         if (obj instanceof PlayerEvent) return AdaptToPlayer(((PlayerEvent)obj).getPlayer());
         if (obj instanceof EntityEvent) return AdaptToPlayer(((EntityEvent)obj).getEntity());
+
+        if (obj instanceof BlockPlaceEvent) return AdaptToPlayer(((BlockPlaceEvent)obj).getPlayer());
+        if (obj instanceof BlockBreakEvent) return AdaptToPlayer(((BlockBreakEvent)obj).getPlayer());
+
         if (obj instanceof UUID) return AdaptToPlayer(Bukkit.getPlayer((UUID)obj));
 
         return null;

@@ -1,6 +1,7 @@
 package moe.protasis.yukicommons.api.player;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents a component of a player. A single player may only have one
@@ -18,6 +19,8 @@ public abstract class PlayerComponent<T extends WrappedPlayer> {
      */
     @Getter
     protected final T owner;
+    @Getter @Setter
+    protected boolean dataReady;
 
     public PlayerComponent(T owner) {
         this.owner = owner;
@@ -35,8 +38,9 @@ public abstract class PlayerComponent<T extends WrappedPlayer> {
      * a database. It is advised to perform database query logic in a blocking
      * fashion in this method.
      */
-    protected void Save() {}
+    public void Save() {}
 
+    public void Destroy() {}
     public void Update() {}
     public EntityLoadType GetLoadType() {
         return EntityLoadType.REGULAR;
