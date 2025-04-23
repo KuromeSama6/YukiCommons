@@ -1,7 +1,0 @@
-name: YukiCommons
-main: moe.protasis.yukicommons.YukiCommonsBukkit
-version: 1.2.0
-author: KuromeSama6
-
-softdepend:
-    - packetevents
