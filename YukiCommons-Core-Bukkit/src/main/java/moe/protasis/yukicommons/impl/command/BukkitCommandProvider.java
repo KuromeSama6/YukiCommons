@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import lombok.AllArgsConstructor;
 import moe.protasis.yukicommons.YukiCommonsBukkit;
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.command.ICommandHandler;
@@ -13,7 +13,6 @@ import moe.protasis.yukicommons.api.exception.command.InvalidCommandException;
 import moe.protasis.yukicommons.api.exception.command.OperationNotPermittedException;
 import moe.protasis.yukicommons.api.exception.command.PermissionDeniedException;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
-import moe.protasis.yukicommons.util.Singletons;
 import org.apache.tools.ant.types.Commandline;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -49,7 +48,7 @@ public class BukkitCommandProvider extends CommandProvider {
         @Override
         public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
             Object parameter = handler.CreateParameterObject();
-            IAbstractCommandExecutor executor = Singletons.Get(IAdapter.class).AdaptToCommandExecutor(commandSender);
+            IAbstractCommandExecutor executor = YukiCommonsBukkit.getInstance().getAdaptor().AdaptToCommandExecutor(commandSender);
             try {
                 JCommander.newBuilder()
                         .expandAtSign(false)

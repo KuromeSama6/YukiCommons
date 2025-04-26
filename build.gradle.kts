@@ -12,10 +12,8 @@ java {
     }
 }
 
-tasks.register("default") {
-    group = "build"
-    description = "Default build task equivalent to 'clean install'"
-    dependsOn("clean", "build")
+tasks.named("build") {
+    finalizedBy(":yukicommons-api:publishToMavenLocal")
 }
 
 allprojects {

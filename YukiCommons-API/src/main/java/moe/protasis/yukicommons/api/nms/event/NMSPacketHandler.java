@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface NMSPacketHandler {
+    String type();
     NMSPacketDirection direction();
     boolean async() default false;
+
 }

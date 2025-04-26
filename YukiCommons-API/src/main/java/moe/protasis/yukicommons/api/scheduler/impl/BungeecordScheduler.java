@@ -30,4 +30,9 @@ public class BungeecordScheduler implements IAbstractScheduler {
     public void RunAsync(Runnable func) {
         ProxyServer.getInstance().getScheduler().runAsync(pl, func);
     }
+
+    @Override
+    public void CallOnMainThread(Runnable func) {
+        ProxyServer.getInstance().getScheduler().schedule(pl, func, 0, TimeUnit.MILLISECONDS);
+    }
 }

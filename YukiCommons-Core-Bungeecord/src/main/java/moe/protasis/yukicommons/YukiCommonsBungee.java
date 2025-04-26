@@ -2,16 +2,16 @@ package moe.protasis.yukicommons;
 
 import lombok.Getter;
 import moe.protasis.yukicommons.api.IYukiCommons;
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.impl.YukiCommonsApiBungeecord;
-import moe.protasis.yukicommons.impl.adapter.BungeecordAdapter;
+import moe.protasis.yukicommons.impl.adapter.BungeecordAdaptor;
 import moe.protasis.yukicommons.impl.command.BungeecordCommandProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
 import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.impl.player.BungeecordPlayerWrapper;
-import moe.protasis.yukicommons.util.Singletons;
+import moe.protasis.yukicommons.util.YukiCommonsApi;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -33,14 +33,16 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
     private static YukiCommonsBungee instance;
     @Getter
     private final List<AutoPlayerLoadData> autoPlayerLoadData = new ArrayList<>();
+    @Getter
+    private IAdaptor adaptor;
 
     @Override
     public void onEnable() {
         instance = this;
         ProxyServer.getInstance().getPluginManager().registerListener(this, this);
 
-        Singletons.Set(new YukiCommonsApiBungeecord());
-        Singletons.Set(new BungeecordAdapter());
+        adaptor = new BungeecordAdaptor();
+        YukiCommonsApi.SetCurrent(new YukiCommonsApiBungeecord());
 
         new BungeecordCommandProvider();
 
@@ -59,7 +61,7 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
             try {
                 WrappedPlayer player = clazz
                         .getDeclaredConstructor(IAbstractPlayer.class)
-                        .newInstance(Singletons.Get(IAdapter.class).AdaptToPlayer(e.getConnection()));
+                        .newInstance(adaptor.AdaptToPlayer(e.getConnection()));
                 player.BlockingLoadData();
                 player.AttemptLogin();
 

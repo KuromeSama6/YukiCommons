@@ -1,18 +1,15 @@
 package moe.protasis.yukicommons.api;
 
-import com.google.gson.JsonSerializer;
-import lombok.Getter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.json.IJsonTypeAdapter;
-import moe.protasis.yukicommons.api.nms.event.INMSPacketListener;
 import moe.protasis.yukicommons.api.nms.event.IPacketEventPacketListener;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
+import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import moe.protasis.yukicommons.util.EnvironmentType;
-import moe.protasis.yukicommons.util.Util;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -31,16 +28,11 @@ public interface IYukiCommonsApi {
      */
     void AddAutoPlayerRegister(Class<? extends WrappedPlayer> clazz, IAbstractPlugin plugin);
 
-    /**
-     * Registers an NMS packet listener to the given plugin, Bukkit event listener style.
-     * @param listener The listener to register.
-     * @param plugin The corresponding plugin.
-     */
-    void RegisterNMSPacketListener(INMSPacketListener listener, IAbstractPlugin plugin);
-
     Logger GetLogger();
     IPacketEventPacketListener GetPacketEventPacketListener();
     Collection<IJsonTypeAdapter> GetJsonTypeAdapters();
+    IVersionAdaptor GetVersionAdaptor();
+    IAdaptor GetAdaptor();
 
     /**
      * Registers all command handlers (classes marked with CommandHandler) to the

@@ -2,14 +2,15 @@ package moe.protasis.yukicommons.impl;
 
 import moe.protasis.yukicommons.YukiCommonsBungee;
 import moe.protasis.yukicommons.api.IYukiCommonsApi;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.json.IJsonTypeAdapter;
-import moe.protasis.yukicommons.api.nms.event.INMSPacketListener;
 import moe.protasis.yukicommons.api.nms.event.IPacketEventPacketListener;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.impl.json.serializer.DateTimeSerializer;
 import moe.protasis.yukicommons.impl.json.serializer.JsonWrapperSerializer;
 import moe.protasis.yukicommons.impl.player.BungeecordAutoPlayerLoadData;
+import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import net.md_5.bungee.api.ProxyServer;
 
@@ -32,10 +33,6 @@ public class YukiCommonsApiBungeecord implements IYukiCommonsApi {
         YukiCommonsBungee.getInstance().getAutoPlayerLoadData().add(new BungeecordAutoPlayerLoadData(clazz, plugin));
     }
 
-    @Override
-    public void RegisterNMSPacketListener(INMSPacketListener listener, IAbstractPlugin plugin) {
-
-    }
 
     @Override
     public Logger GetLogger() {
@@ -50,5 +47,15 @@ public class YukiCommonsApiBungeecord implements IYukiCommonsApi {
     @Override
     public Collection<IJsonTypeAdapter> GetJsonTypeAdapters() {
         return jsonTypeAdapters;
+    }
+
+    @Override
+    public IVersionAdaptor GetVersionAdaptor() {
+        throw new UnsupportedOperationException("Not supported on this platform");
+    }
+
+    @Override
+    public IAdaptor GetAdaptor() {
+        return YukiCommonsBungee.getInstance().getAdaptor();
     }
 }

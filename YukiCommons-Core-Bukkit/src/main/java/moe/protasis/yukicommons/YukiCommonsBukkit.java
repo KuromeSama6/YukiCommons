@@ -1,21 +1,26 @@
 package moe.protasis.yukicommons;
 
-import com.github.retrooper.packetevents.wrapper.login.client.WrapperLoginClientCookieResponse;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.IYukiCommons;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
+import moe.protasis.yukicommons.api.nms.event.IPacketEventPacketListener;
+import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
+import moe.protasis.yukicommons.api.scheduler.IAbstractScheduler;
+import moe.protasis.yukicommons.api.scheduler.impl.BukkitScheduler;
 import moe.protasis.yukicommons.impl.YukiCommonsApiBukkit;
-import moe.protasis.yukicommons.impl.adapter.BukkitAdapter;
+import moe.protasis.yukicommons.impl.adapter.BukkitAdaptor;
 import moe.protasis.yukicommons.impl.command.BukkitCommandProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
 import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
+import moe.protasis.yukicommons.impl.nms.event.NOPPacketEventPacketListener;
 import moe.protasis.yukicommons.impl.player.BukkitPlayerWrapper;
 import moe.protasis.yukicommons.api.player.PendingPlayerWrapper;
-import moe.protasis.yukicommons.nms.IVersionAdaptor;
+import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import moe.protasis.yukicommons.impl.nms.event.PacketEventPacketListenerSpigot;
-import moe.protasis.yukicommons.util.Singletons;
 import moe.protasis.yukicommons.util.Util;
+import moe.protasis.yukicommons.util.YukiCommonsApi;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,28 +37,34 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiCommons {
+public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiCommons, IAbstractPlugin {
     @Getter
     private static YukiCommonsBukkit instance;
     @Getter
     private IVersionAdaptor versionAdaptor;
     @Getter
+    private IAdaptor adaptor;
+    @Getter
     private final List<AutoPlayerLoadData> autoPlayerLoadData = new ArrayList<>();
     @Getter
     private boolean packetEventsEnabled;
     @Getter
-    private PacketEventPacketListenerSpigot nmsPacketListener;
+    private IPacketEventPacketListener nmsPacketListener;
+    private IAbstractScheduler scheduler;
 
     @Override
     public void onEnable() {
         instance = this;
         Bukkit.getPluginManager().registerEvents(this, this);
+
         versionAdaptor = IVersionAdaptor.Get();
+        adaptor = new BukkitAdaptor();
+
         getLogger().info("Using version adapter: %s".formatted(versionAdaptor));
 
-        Singletons.Set(new BukkitAdapter());
-        Singletons.Set(versionAdaptor);
-        Singletons.Set(new YukiCommonsApiBukkit());
+        scheduler = new BukkitScheduler(this);
+
+        YukiCommonsApi.SetCurrent(new YukiCommonsApiBukkit());
 
         new BukkitCommandProvider();
 
@@ -64,7 +75,7 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
             getLogger().warning("PacketEvents is not enabled and/or not installed. NMS features may not work.");
         }
 
-        nmsPacketListener = new PacketEventPacketListenerSpigot();
+        nmsPacketListener = packetEventsEnabled ? new PacketEventPacketListenerSpigot() : new NOPPacketEventPacketListener();
     }
 
     public void OnTick() {
@@ -140,7 +151,17 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
     }
 
     @Override
+    public IAbstractScheduler GetScheduler() {
+        return scheduler;
+    }
+
+    @Override
     public Logger GetLogger() {
         return getLogger();
+    }
+
+    @Override
+    public ClassLoader GetClassLoader() {
+        return getClassLoader();
     }
 }

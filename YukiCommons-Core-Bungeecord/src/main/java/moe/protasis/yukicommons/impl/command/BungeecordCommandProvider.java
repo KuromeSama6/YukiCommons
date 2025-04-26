@@ -3,7 +3,7 @@ package moe.protasis.yukicommons.impl.command;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import moe.protasis.yukicommons.YukiCommonsBungee;
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.command.ICommandHandler;
@@ -12,7 +12,6 @@ import moe.protasis.yukicommons.api.exception.command.InvalidCommandException;
 import moe.protasis.yukicommons.api.exception.command.OperationNotPermittedException;
 import moe.protasis.yukicommons.api.exception.command.PermissionDeniedException;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
-import moe.protasis.yukicommons.util.Singletons;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -44,7 +43,7 @@ public class BungeecordCommandProvider extends CommandProvider {
         @Override
         public void execute(CommandSender commandSender, String[] strings) {
             Object parameter = handler.CreateParameterObject();
-            IAbstractCommandExecutor executor = Singletons.Get(IAdapter.class).AdaptToCommandExecutor(commandSender);
+            IAbstractCommandExecutor executor = YukiCommonsBungee.getInstance().getAdaptor().AdaptToCommandExecutor(commandSender);
 
             try {
                 var jCommander = JCommander.newBuilder()

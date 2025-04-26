@@ -1,14 +1,17 @@
-package moe.protasis.yukicommons.nms;
+package moe.protasis.yukicommons.api.nms;
 
+import moe.protasis.yukicommons.api.world.AABB;
 import moe.protasis.yukicommons.util.Lazy;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.logging.Logger;
 
 public interface IVersionAdaptor {
     Lazy<IVersionAdaptor> instance = new Lazy<>(IVersionAdaptor::Get);
 
+    int GetPlayerPing(Player player);
+    AABB GetBoundingBox(Entity entity);
     String SerializeItem(ItemStack itemStack);
     ItemStack DeserializeItem(String item);
     ItemStack AddTag(ItemStack item, String key);

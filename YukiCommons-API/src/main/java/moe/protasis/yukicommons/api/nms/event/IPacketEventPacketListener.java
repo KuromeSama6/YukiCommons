@@ -4,4 +4,6 @@ import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 
 public interface IPacketEventPacketListener {
     void Register(INMSPacketListener listener, IAbstractPlugin plugin);
+    void Unregister(INMSPacketListener listener);
+    void UnregisterAll(IAbstractPlugin plugin);
 }

@@ -1,6 +1,6 @@
 package moe.protasis.yukicommons.impl.adapter;
 
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.impl.command.BukkitConsoleCommandExecutor;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
@@ -18,7 +18,7 @@ import org.bukkit.event.player.PlayerEvent;
 
 import java.util.UUID;
 
-public class BukkitAdapter implements IAdapter {
+public class BukkitAdaptor implements IAdaptor {
     @Override
     public IAbstractPlayer AdaptToPlayer(Object obj) {
         if (obj instanceof IWrappedPlayer) return ((IWrappedPlayer)obj).GetPlayer();

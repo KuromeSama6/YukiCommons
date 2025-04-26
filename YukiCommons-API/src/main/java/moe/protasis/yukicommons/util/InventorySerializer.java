@@ -2,7 +2,7 @@ package moe.protasis.yukicommons.util;
 
 import lombok.experimental.UtilityClass;
 import moe.protasis.yukicommons.api.json.JsonWrapper;
-import moe.protasis.yukicommons.nms.IVersionAdaptor;
+import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryType;

@@ -1,6 +1,6 @@
 package moe.protasis.yukicommons.impl.adapter;
 
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.IWrappedPlayer;
@@ -14,7 +14,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-public class BungeecordAdapter implements IAdapter {
+public class BungeecordAdaptor implements IAdaptor {
     public IAbstractPlayer AdaptToPlayer(Object obj) {
         if (obj instanceof IWrappedPlayer) return ((IWrappedPlayer)obj).GetPlayer();
         if (obj instanceof IAbstractPlayer) return (IAbstractPlayer)obj;

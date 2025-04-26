@@ -4,8 +4,8 @@ import com.google.gson.*;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.IYukiCommonsApi;
 import moe.protasis.yukicommons.util.EnvironmentType;
-import moe.protasis.yukicommons.util.Singletons;
 import moe.protasis.yukicommons.util.Util;
+import moe.protasis.yukicommons.util.YukiCommonsApi;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
@@ -203,7 +203,7 @@ public class JsonWrapper {
     public void Save(File file) {
         file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file)){
-            new GsonBuilder()
+            GetBuilder()
                     .setPrettyPrinting()
                     .create()
                     .toJson(json, writer);
@@ -266,13 +266,13 @@ public class JsonWrapper {
 
     @Override
     public String toString() {
-        return json.toString();
+        return gson.toJson(json);
     }
 
     public static GsonBuilder GetBuilder() {
         var builder = new GsonBuilder()
                 .disableHtmlEscaping();
-        var api = Singletons.Get(IYukiCommonsApi.class);
+        var api = YukiCommonsApi.Get();
         for (var adapter : api.GetJsonTypeAdapters()) {
             builder.registerTypeAdapter(adapter.GetTargetType(), adapter);
         }

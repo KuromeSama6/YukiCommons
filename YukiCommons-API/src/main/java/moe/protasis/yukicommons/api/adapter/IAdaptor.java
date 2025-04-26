@@ -2,8 +2,6 @@ package moe.protasis.yukicommons.api.adapter;
 
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
-import moe.protasis.yukicommons.util.EnvironmentType;
-import moe.protasis.yukicommons.util.Util;
 
 /**
  * <code>IAdapter</code> is an interface for handling different abstract objects
@@ -11,7 +9,7 @@ import moe.protasis.yukicommons.util.Util;
  * <code>IAbstractPlayer</code> which represents a player either on Spigot or
  * Bungeecord.
  */
-public interface IAdapter {
+public interface IAdaptor {
     /**
      * Returns an IAbstractPlayer representing the corresponding player.
      * Supported objects are: IAbstractPlayer, Player, EntityEvent (whose Entity is a Player),

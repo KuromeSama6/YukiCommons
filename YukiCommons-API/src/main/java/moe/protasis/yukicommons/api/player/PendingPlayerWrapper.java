@@ -2,6 +2,8 @@ package moe.protasis.yukicommons.api.player;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import moe.protasis.yukicommons.api.display.IScoreboard;
+import moe.protasis.yukicommons.api.world.AABB;
 
 import java.util.UUID;
 
@@ -41,7 +43,27 @@ public class PendingPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public int GetPing() {
+        return 0;
+    }
+
+    @Override
+    public IScoreboard GetScoreboard() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void Destroy() {
+
+    }
+
+    @Override
     public String GetName() {
         return "";
+    }
+
+    @Override
+    public AABB GetBoundingBox() {
+        return AABB.Zero();
     }
 }

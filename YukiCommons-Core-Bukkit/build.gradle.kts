@@ -34,6 +34,7 @@ dependencies {
     implementation("io.github.classgraph:classgraph:4.8.174")
     implementation("org.apache.ant:ant:1.10.15")
     implementation("com.zaxxer:HikariCP:4.0.3")
+    implementation("fr.mrmicky:fastboard:2.1.4")
 
     implementation(project(":yukicommons-api"))
     implementation(project(":yukicommons-common"))

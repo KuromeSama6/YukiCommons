@@ -1,12 +1,13 @@
 package moe.protasis.yukicommons.api.player;
 
 import moe.protasis.yukicommons.api.entity.IAbstractLivingEntity;
+import moe.protasis.yukicommons.api.misc.IDestroyable;
 import org.bukkit.entity.Player;
 
 /**
  * Represents an entity that has a name. This entity may not nessecarily be a player.
  */
-public interface INamedHumanoid {
+public interface INamedHumanoid extends IDestroyable {
     /**
      * @return Whether this entity is an actual entity in the world.
      */

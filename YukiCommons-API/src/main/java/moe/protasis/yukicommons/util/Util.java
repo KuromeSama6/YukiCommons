@@ -38,7 +38,7 @@ public class Util {
     }
 
     public static EnvironmentType GetEnvironment() {
-        var api = Singletons.Get(IYukiCommonsApi.class);
+        var api = YukiCommonsApi.Get();
         return api.GetEnvironment();
     }
 

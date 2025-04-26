@@ -1,6 +1,7 @@
 plugins {
     java
     id("io.freefair.lombok") version "8.4" // Optional, for Lombok support
+    `maven-publish` // <-- Add this line
 }
 
 group = "moe.protasis"
@@ -43,4 +44,16 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+
+            groupId = "moe.protasis"
+            artifactId = "yukicommons-api"
+            version = "1.2.0"
+        }
+    }
 }

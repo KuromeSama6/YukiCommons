@@ -1,6 +1,6 @@
 package moe.protasis.yukicommons.util;
 
-import moe.protasis.yukicommons.nms.IVersionAdaptor;
+import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;

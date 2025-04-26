@@ -2,11 +2,11 @@ package moe.protasis.yukicommons.impl.player;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.YukiCommonsBukkit;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
-import moe.protasis.yukicommons.util.Singletons;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -71,7 +71,7 @@ public class BukkitAutoPlayerLoadData extends AutoPlayerLoadData implements List
 //        }
 //        calledThisFrame.add(event.getClass());
 
-        var player = Singletons.Get(IAdapter.class).AdaptToPlayer(event);
+        var player = YukiCommonsBukkit.getInstance().getAdaptor().AdaptToPlayer(event);
         if (player == null) {
             if (!adaptationFailedWarnings.contains(event.getClass())) {
                 adaptationFailedWarnings.add(event.getClass());

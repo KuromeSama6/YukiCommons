@@ -28,4 +28,12 @@ public class BukkitScheduler implements IAbstractScheduler {
     public void RunAsync(Runnable func) {
         Bukkit.getScheduler().runTaskAsynchronously(pl, func);
     }
+
+    @Override
+    public void CallOnMainThread(Runnable func) {
+        Bukkit.getScheduler().callSyncMethod(pl, () -> {
+            func.run();
+            return null;
+        });
+    }
 }

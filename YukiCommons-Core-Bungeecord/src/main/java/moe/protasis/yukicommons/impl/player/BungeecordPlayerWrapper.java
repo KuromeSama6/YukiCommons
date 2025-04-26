@@ -2,7 +2,9 @@ package moe.protasis.yukicommons.impl.player;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
+import moe.protasis.yukicommons.api.world.AABB;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -44,12 +46,32 @@ public class BungeecordPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public AABB GetBoundingBox() {
+        throw new UnsupportedOperationException("BungeeCord does not support bounding boxes");
+    }
+
+    @Override
     public boolean HasPermission(String perm) {
         return player.hasPermission(perm);
     }
 
     @Override
+    public int GetPing() {
+        return player.getPing();
+    }
+
+    @Override
     public ProxiedPlayer GetProxyPlayer() {
         return player;
+    }
+
+    @Override
+    public IScoreboard GetScoreboard() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void Destroy() {
+
     }
 }

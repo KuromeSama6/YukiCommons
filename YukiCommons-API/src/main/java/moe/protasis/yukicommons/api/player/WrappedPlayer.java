@@ -1,12 +1,13 @@
 package moe.protasis.yukicommons.api.player;
 
-import moe.protasis.yukicommons.api.adapter.IAdapter;
+import moe.protasis.yukicommons.api.adapter.IAdaptor;
+import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.api.data.IDatabaseProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
-import moe.protasis.yukicommons.util.Singletons;
+import moe.protasis.yukicommons.util.YukiCommonsApi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -192,9 +193,11 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * Destroys this WrappedPlayer object, saving it and all of its component first,
      * then removes it from the player list.
      */
+    @Override
     public void Destroy() {
         Destroy(true);
         scheduler.Free();
+        player.Destroy();
     }
 
     public void Destroy(boolean save) {
@@ -258,6 +261,10 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      */
     public void OnPostInit() {}
 
+    public IScoreboard GetScoreboard() {
+        return player.GetScoreboard();
+    }
+
     public <T extends WrappedPlayer> T GetPlayer(Class<T> clazz) {
         return GetPlayer(uuid, clazz);
     }
@@ -275,7 +282,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
 //            System.out.println("player is null!");
             return null;
         }
-        IAbstractPlayer abstractPlayer = Singletons.Get(IAdapter.class).AdaptToPlayer(player);
+        IAbstractPlayer abstractPlayer = YukiCommonsApi.Get().GetAdaptor().AdaptToPlayer(player);
         if (abstractPlayer == null){
 //            System.out.println("player abs is null!");
             return null;
