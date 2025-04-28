@@ -2,7 +2,6 @@ package moe.protasis.yukicommons.api.player;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import moe.protasis.yukicommons.api.command.CommandHandler;
 import moe.protasis.yukicommons.api.nms.event.PlayerEventHandler;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.util.Util;
@@ -30,8 +29,7 @@ public abstract class AutoPlayerLoadData {
             }
 
             var annotation = method.getAnnotation(PlayerEventHandler.class);
-            if (!(annotation.platform() == CommandHandler.ExecutionPlatform.BOTH ||
-                    annotation.platform().getEnvironmentType() == Util.GetEnvironment())) {
+            if (!(annotation.platform().IsSupported(Util.GetEnvironment()))) {
                 continue;
             }
 

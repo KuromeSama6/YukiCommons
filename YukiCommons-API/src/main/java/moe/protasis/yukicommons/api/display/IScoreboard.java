@@ -19,4 +19,5 @@ public interface IScoreboard extends IDisplay{
      * @param provider The provider to remove.
      */
     void RemoveProvider(IScoreboardProvider provider);
+    void RemoveAllProviders();
 }

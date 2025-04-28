@@ -1,11 +1,11 @@
 plugins {
     java
     id("io.freefair.lombok") version "8.4" // Optional, for Lombok support
-    `maven-publish` // <-- Add this line
+    `maven-publish`
 }
 
 group = "moe.protasis"
-version = "1.2.0"
+version = project.parent?.version as String;
 
 java {
     toolchain {
@@ -33,6 +33,8 @@ dependencies {
     implementation("org.apache.ant:ant:1.10.15")
     implementation("com.zaxxer:HikariCP:4.0.3")
 
+    compileOnly("moe.protasis:yukicommons-api:1.2.0")
+
     // Optional: avoid downloading javadoc classifier as a real dependency
     compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT") {
         artifact {
@@ -53,7 +55,7 @@ publishing {
 
             groupId = "moe.protasis"
             artifactId = "yukicommons-api"
-            version = "1.2.0"
+            version = version.toString()
         }
     }
 }

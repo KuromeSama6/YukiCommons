@@ -2,7 +2,6 @@ package moe.protasis.yukicommons.api.json;
 
 import com.google.gson.*;
 import lombok.Getter;
-import moe.protasis.yukicommons.api.IYukiCommonsApi;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import moe.protasis.yukicommons.util.Util;
 import moe.protasis.yukicommons.util.YukiCommonsApi;

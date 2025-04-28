@@ -1,7 +1,6 @@
 package moe.protasis.yukicommons.api.command;
 
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
-import moe.protasis.yukicommons.api.player.WrappedPlayer;
 
 /**
  * An interface that represents an abstract command executor on any platform.

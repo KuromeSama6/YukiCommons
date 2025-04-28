@@ -19,6 +19,18 @@ public class VersionAdaptor_v1_8_R3 implements IVersionAdaptor {
     }
 
     @Override
+    public ItemStack SetUnbreakable(ItemStack item, boolean unbreakable) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+        }
+        tag.setBoolean("Unbreakable", unbreakable);
+        nmsItem.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
     public AABB GetBoundingBox(Entity entity) {
         var bb = ((CraftEntity)entity).getHandle().getBoundingBox();
         return new AABB(bb.a, bb.b, bb.c, bb.d, bb.e, bb.f);
@@ -26,11 +38,20 @@ public class VersionAdaptor_v1_8_R3 implements IVersionAdaptor {
 
     @Override
     public String SerializeItem(ItemStack itemStack) {
-        return CraftItemStack.asNMSCopy(itemStack).save(new NBTTagCompound()).toString();
+        if (itemStack == null) {
+            return null;
+        }
+        var ret = CraftItemStack.asNMSCopy(itemStack);
+        if (ret == null) return null;
+        return ret.save(new NBTTagCompound()).toString();
     }
 
     @Override
     public ItemStack DeserializeItem(String item) {
+        if (item == null) {
+            return null;
+        }
+
         try {
             return CraftItemStack.asBukkitCopy(net.minecraft.server.v1_8_R3.ItemStack.createStack(MojangsonParser.parse(item)));
         } catch (MojangsonParseException e) {

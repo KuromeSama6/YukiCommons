@@ -1,6 +1,5 @@
 package moe.protasis.yukicommons.api.player;
 
-import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.api.data.IDatabaseProvider;
@@ -198,6 +197,9 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         Destroy(true);
         scheduler.Free();
         player.Destroy();
+        if (GetScoreboard() != null) {
+            GetScoreboard().RemoveAllProviders();
+        }
     }
 
     public void Destroy(boolean save) {

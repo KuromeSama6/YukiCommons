@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "moe.protasis"
-version = "1.2.0"
+version = "1.2.1"
 description = "Parent project for YukiCommons"
 
 java {
@@ -14,6 +14,9 @@ java {
 
 tasks.named("build") {
     finalizedBy(":yukicommons-api:publishToMavenLocal")
+    finalizedBy(":yukicommons-core-bukkit:publishToMavenLocal")
+    finalizedBy(":yukicommons-core-bungeecord:publishToMavenLocal")
+    finalizedBy(":yukicommons-core-velocity:publishToMavenLocal")
 }
 
 allprojects {

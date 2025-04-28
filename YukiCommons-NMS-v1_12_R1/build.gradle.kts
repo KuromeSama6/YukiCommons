@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "moe.protasis"
-version = "1.2.0"
+version = project.parent?.version as String;
 
 java {
     toolchain {

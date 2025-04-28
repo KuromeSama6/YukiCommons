@@ -20,8 +20,16 @@ import java.util.stream.Collectors;
 public class ItemBuilder {
     protected ItemStack item;
 
+    public ItemBuilder(Material material) {
+        this(material, 1);
+    }
+
     public ItemBuilder(Material material, int qty) {
         item = new ItemStack(material, qty);
+    }
+
+    public ItemBuilder(ItemStack item) {
+        this.item = item.clone();
     }
 
     public ItemBuilder SetDisplay(String str) {
@@ -38,6 +46,19 @@ public class ItemBuilder {
         current.addAll(Arrays.stream(lores).map(c -> ChatColor.translateAlternateColorCodes('&', c)).collect(Collectors.toList()));
         meta.setLore(current);
         item.setItemMeta(meta);
+        return this;
+    }
+
+    public ItemBuilder SetDurability(int durability) {
+        item.setDurability((short)durability);
+        return this;
+    }
+
+    public ItemBuilder SetUnbreakable(boolean unbreakable) {
+        var version = IVersionAdaptor.Get();
+        if (version == null) return this;
+
+        item = version.SetUnbreakable(item, unbreakable);
         return this;
     }
 
@@ -86,5 +107,9 @@ public class ItemBuilder {
 
     public ItemStack Build() {
         return item.clone();
+    }
+
+    public static ItemBuilder Unbreakable(Material material) {
+        return new ItemBuilder(material).SetUnbreakable(true);
     }
 }

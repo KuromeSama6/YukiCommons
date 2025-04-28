@@ -1,7 +1,6 @@
 package moe.protasis.yukicommons.api.command;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.NonNull;
 import moe.protasis.yukicommons.util.EnvironmentType;
 
 import java.lang.annotation.*;
@@ -20,15 +19,29 @@ public @interface CommandHandler {
      * 
      * @return The platform.
      */
-    ExecutionPlatform platform() default ExecutionPlatform.BOTH;
+    @NonNull ExecutionPlatform platform() default ExecutionPlatform.BOTH;
 
-    @AllArgsConstructor
     enum ExecutionPlatform {
-        BOTH(null),
+        BOTH((EnvironmentType[])null),
         SPIGOT(EnvironmentType.BUKKIT),
         PROXY(EnvironmentType.BUNGEECORD);
 
-        @Getter
-        private final EnvironmentType environmentType;
+        private final EnvironmentType[] supportedEnvironments;
+
+        ExecutionPlatform(EnvironmentType... supportedEnvironments) {
+            this.supportedEnvironments = supportedEnvironments;
+        }
+
+        public boolean IsSupported(EnvironmentType environment) {
+            if (supportedEnvironments == null) {
+                return true;
+            }
+            for (EnvironmentType supportedEnvironment : supportedEnvironments) {
+                if (supportedEnvironment == environment) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

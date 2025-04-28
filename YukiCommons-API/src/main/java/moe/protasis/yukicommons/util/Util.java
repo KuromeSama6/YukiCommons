@@ -1,7 +1,6 @@
 package moe.protasis.yukicommons.util;
 
 import lombok.experimental.UtilityClass;
-import moe.protasis.yukicommons.api.IYukiCommonsApi;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,5 +1,5 @@
 name: YukiCommons
-main: moe.protasis.yukicommons.YukiCommonsBukkit
+main: moe.protasis.yukicommons.bukkit.impl.YukiCommonsBukkit
 version: 1.2.0
 author: KuromeSama6
 

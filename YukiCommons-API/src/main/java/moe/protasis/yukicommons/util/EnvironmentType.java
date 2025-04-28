@@ -2,5 +2,6 @@ package moe.protasis.yukicommons.util;
 
 public enum EnvironmentType {
     BUKKIT,
-    BUNGEECORD
+    BUNGEECORD,
+    VELOCITY,
 }

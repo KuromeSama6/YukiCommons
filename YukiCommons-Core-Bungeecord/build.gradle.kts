@@ -1,11 +1,12 @@
 plugins {
     java
-    id("io.freefair.lombok") version "8.4" // Optional, for Lombok
-    id("com.github.johnrengelman.shadow") version "8.1.1" // Maven Shade equivalent
+    id("io.freefair.lombok") version "8.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    `maven-publish`
 }
 
 group = "moe.protasis"
-version = "1.2.0"
+version = project.parent?.version as String;
 
 java {
     toolchain {
@@ -47,9 +48,22 @@ tasks.withType<JavaCompile> {
 tasks {
     named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
         archiveClassifier.set("") // Replace default 'all' suffix
+        version = project.version.toString()
     }
 
     build {
         dependsOn(shadowJar)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+
+            groupId = "moe.protasis"
+            artifactId = "yukicommons-core-bungeecord"
+            version = version.toString()
+        }
     }
 }
