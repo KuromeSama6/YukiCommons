@@ -3,6 +3,7 @@ package moe.protasis.yukicommons.bungeecord.impl;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.IYukiCommons;
 import moe.protasis.yukicommons.api.adapter.IAdaptor;
+import moe.protasis.yukicommons.api.player.PendingPlayerWrapper;
 import moe.protasis.yukicommons.bungeecord.impl.adapter.BungeecordAdaptor;
 import moe.protasis.yukicommons.bungeecord.impl.command.BungeecordCommandProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
@@ -13,6 +14,7 @@ import moe.protasis.yukicommons.bungeecord.impl.player.BungeecordPlayerWrapper;
 import moe.protasis.yukicommons.util.YukiCommonsApi;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
@@ -48,6 +50,12 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
         ProxyServer.getInstance().getScheduler().schedule(this, this::OnTick, 0, 1000 / 20, TimeUnit.MILLISECONDS);
     }
 
+    @Override
+    public void onDisable() {
+        super.onDisable();
+        ProxyServer.getInstance().getPlayers().forEach(this::DestroyPlayer);
+    }
+
     public void OnTick() {
         WrappedPlayer.GetAllPlayers().forEach(WrappedPlayer::Update);
     }
@@ -60,9 +68,8 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
             try {
                 WrappedPlayer player = clazz
                         .getDeclaredConstructor(IAbstractPlayer.class)
-                        .newInstance(adaptor.AdaptToPlayer(e.getConnection()));
-                player.BlockingLoadData();
-                player.AttemptLogin();
+                        .newInstance(new PendingPlayerWrapper(e.getConnection().getUniqueId(), e.getConnection().getName()));
+                player.LoadAll();
 
             } catch (LoginDeniedException ex) {
                 YukiCommonsBungee.getInstance().getLogger().warning(String.format("Login was denied by %s: %s", clazz, ex.getMessage()));
@@ -74,10 +81,19 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
             } catch (Exception ex) {
                 getLogger().severe(String.format("An error occured while instantiating WrappedPlayer class %s:", clazz.getName()));
                 ex.printStackTrace();
+                e.setCancelled(true);
+                e.setCancelReason(new TextComponent("§cThere was an error while loading your data.\nIf you are the server owner, please check the console for more information."));
+                WrappedPlayer.DestroyAll(e.getConnection().getUniqueId());
+                return;
             }
         }
 
-        WrappedPlayer.GetAllPlayers().forEach(WrappedPlayer::OnPostInit);
+        for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+            WrappedPlayer player = map.get(e.getConnection().getUniqueId());
+            if (player != null) {
+                player.OnPostInit();
+            }
+        }
     }
 
     @EventHandler
@@ -94,7 +110,23 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
 
     @EventHandler
     public void OnPlayerQuit(PlayerDisconnectEvent e) {
-        WrappedPlayer.DestroyAll(e.getPlayer().getUniqueId());
+        DestroyPlayer(e.getPlayer());
+    }
+
+    private void DestroyPlayer(ProxiedPlayer p) {
+        ProxyServer.getInstance().getScheduler().runAsync(this, () -> {
+            for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+                WrappedPlayer player = map.get(p.getUniqueId());
+                if (player != null) {
+                    try {
+                        player.SaveAll();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            WrappedPlayer.DestroyAll(p.getUniqueId());
+        });
     }
 
     @Override

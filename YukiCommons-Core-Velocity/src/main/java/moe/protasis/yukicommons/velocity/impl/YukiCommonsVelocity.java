@@ -1,6 +1,8 @@
 package moe.protasis.yukicommons.velocity.impl;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.Continuation;
+import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -8,16 +10,19 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.IYukiCommons;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
 import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
+import moe.protasis.yukicommons.api.player.PendingPlayerWrapper;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.velocity.impl.adapter.VelocityAdaptor;
 import moe.protasis.yukicommons.velocity.impl.command.VelocityCommandProvider;
 import moe.protasis.yukicommons.util.YukiCommonsApi;
+import moe.protasis.yukicommons.velocity.impl.player.VelocityPlayerWrapper;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
@@ -67,29 +72,38 @@ public class YukiCommonsVelocity implements IYukiCommons {
     }
 
     @Subscribe
-    private void OnLogin(LoginEvent e) {
-        for (AutoPlayerLoadData data : autoPlayerLoadData) {
-            Class<? extends WrappedPlayer> clazz = data.getPlayerClass();
-            try {
-                WrappedPlayer player = clazz
-                        .getDeclaredConstructor(IAbstractPlayer.class)
-                        .newInstance(adaptor.AdaptToPlayer(e.getPlayer()));
-                player.BlockingLoadData();
-                player.AttemptLogin();
+    private EventTask OnLogin(LoginEvent e) {
+        return EventTask.async(() -> {
+            for (AutoPlayerLoadData data : autoPlayerLoadData) {
+                Class<? extends WrappedPlayer> clazz = data.getPlayerClass();
+                try {
+                    WrappedPlayer player = clazz
+                            .getDeclaredConstructor(IAbstractPlayer.class)
+                            .newInstance(new PendingPlayerWrapper(e.getPlayer().getUniqueId(), e.getPlayer().getUsername()));
+                    player.LoadAll();
 
-            } catch (LoginDeniedException ex) {
-                logger.warning(String.format("Login was denied by %s: %s", clazz, ex.getMessage()));
-                e.setResult(ResultedEvent.ComponentResult.denied(Component.text(ex.getMessage())));
-                WrappedPlayer.DestroyAll(e.getPlayer().getUniqueId());
-                return;
+                } catch (LoginDeniedException ex) {
+                    logger.warning(String.format("Login was denied by %s: %s", clazz, ex.getMessage()));
+                    e.setResult(ResultedEvent.ComponentResult.denied(Component.text(ex.getMessage())));
+                    WrappedPlayer.DestroyAll(e.getPlayer().getUniqueId());
+                    return;
 
-            } catch (Exception ex) {
-                GetLogger().severe(String.format("An error occured while instantiating WrappedPlayer class %s:", clazz.getName()));
-                ex.printStackTrace();
+                } catch (Exception ex) {
+                    GetLogger().severe(String.format("An error occured while instantiating WrappedPlayer class %s:", clazz.getName()));
+                    ex.printStackTrace();
+                    e.setResult(ResultedEvent.ComponentResult.denied(Component.text("§cThere was an error while loading your data.\nIf you are the server owner, please check the console for more information.")));
+                    WrappedPlayer.DestroyAll(e.getPlayer().getUniqueId());
+                    return;
+                }
             }
-        }
 
-        WrappedPlayer.GetAllPlayers().forEach(WrappedPlayer::OnPostInit);
+            for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+                WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
+                if (player != null) {
+                    player.OnPostInit();
+                }
+            }
+        });
     }
 
     @Subscribe
@@ -98,6 +112,7 @@ public class YukiCommonsVelocity implements IYukiCommons {
         for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
+                player.FinalizeConnection(new VelocityPlayerWrapper(e.getPlayer()));
                 player.OnJoin();
             }
         }
@@ -105,7 +120,24 @@ public class YukiCommonsVelocity implements IYukiCommons {
 
     @Subscribe
     public void OnPlayerQuit(DisconnectEvent e) {
-        WrappedPlayer.DestroyAll(e.getPlayer().getUniqueId());
+        DestroyPlayer(e.getPlayer());
+    }
+
+    private void DestroyPlayer(Player p) {
+        server.getScheduler().buildTask(this, () -> {
+            for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+                WrappedPlayer player = map.get(p.getUniqueId());
+                if (player != null) {
+                    try {
+                        player.SaveAll();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            WrappedPlayer.DestroyAll(p.getUniqueId());
+        })
+        .schedule();
     }
 
     private void Update() {

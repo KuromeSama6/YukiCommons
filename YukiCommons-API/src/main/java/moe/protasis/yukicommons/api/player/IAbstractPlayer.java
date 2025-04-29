@@ -1,5 +1,6 @@
 package moe.protasis.yukicommons.api.player;
 
+import moe.protasis.yukicommons.api.display.IExperienceBar;
 import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.entity.IAbstractLivingEntity;
 import net.md_5.bungee.api.ProxyServer;
@@ -55,6 +56,7 @@ public interface IAbstractPlayer extends IAbstractLivingEntity {
      * @return The scoreboard display.
      */
     IScoreboard GetScoreboard();
+    IExperienceBar GetExperienceBar();
 
     /**
      * Destroys and invalidates this abstract player. This is called automatically when the player logs out; do not call this manually.
@@ -75,5 +77,13 @@ public interface IAbstractPlayer extends IAbstractLivingEntity {
      */
     default ProxiedPlayer GetProxyPlayer() {
         return ProxyServer.getInstance().getPlayer(GetUuid());
+    }
+
+    default <T> T GetPlatformPlayer() {
+        return (T)GetHandle();
+    }
+
+    default <T> T GetPlatformPlayer(Class<T> clazz) {
+        return (T)GetHandle();
     }
 }

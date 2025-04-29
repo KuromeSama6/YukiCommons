@@ -21,19 +21,18 @@ import moe.protasis.yukicommons.bukkit.impl.nms.event.BukkitPacketEventPacketLis
 import moe.protasis.yukicommons.util.Util;
 import moe.protasis.yukicommons.util.YukiCommonsApi;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiCommons, IAbstractPlugin {
@@ -77,6 +76,12 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
         nmsPacketListener = packetEventsEnabled ? new BukkitPacketEventPacketListener() : new NOPPacketEventPacketListener();
     }
 
+    @Override
+    public void onDisable() {
+        super.onDisable();
+        Bukkit.getOnlinePlayers().forEach(this::DestroyPlayer);
+    }
+
     public void OnTick() {
         WrappedPlayer.GetAllPlayers().forEach(c -> {
             if (c.GetPlayer().GetBukkitPlayer() != null) {
@@ -88,24 +93,16 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
 
     @EventHandler
     private void OnPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
-//        System.out.println(String.format("login started: %s", System.currentTimeMillis()));
-//        System.out.println(String.format("login next: %s", System.currentTimeMillis()));
-
-        // auto registers
-//        System.out.println("player pre login");
         for (AutoPlayerLoadData data : autoPlayerLoadData) {
             Class<? extends WrappedPlayer> clazz = data.getPlayerClass();
 
             try {
-//                System.out.println(String.format("new class from auto register %s", clazz));
                 synchronized (WrappedPlayer.getPlayers()) {
                     WrappedPlayer pl = clazz
                             .getDeclaredConstructor(IAbstractPlayer.class)
-                            .newInstance(new PendingPlayerWrapper(e.getUniqueId()));
-                    pl.BlockingLoadData();
-                    pl.AttemptLogin();
+                            .newInstance(new PendingPlayerWrapper(e.getUniqueId(), e.getName()));
+                    pl.LoadAll();
                     e.allow();
-//                    System.out.println(String.format("login done: %s, %s", System.currentTimeMillis(), WrappedPlayer.GetPlayer(e.getUniqueId(), clazz)));
                 }
 
             } catch (LoginDeniedException ex) {
@@ -117,10 +114,17 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
             } catch (Exception ex) {
                 getLogger().severe(String.format("An error occured while instantiating WrappedPlayer class %s:", clazz.getName()));
                 ex.printStackTrace();
+                e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "§cThere was an error while loading your data.\nIf you are the server owner, please check the console for more information.");
+                return;
             }
         }
 
-        WrappedPlayer.GetAllPlayers().forEach(WrappedPlayer::OnPostInit);
+        for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+            WrappedPlayer player = map.get(e.getUniqueId());
+            if (player != null) {
+                player.OnPostInit();
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -146,7 +150,24 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
 
     @EventHandler
     private void OnPlayerQuit(PlayerQuitEvent e) {
-        WrappedPlayer.DestroyAll(e.getPlayer().getUniqueId());
+        DestroyPlayer(e.getPlayer());
+    }
+
+    private void DestroyPlayer(Player p) {
+        CompletableFuture.runAsync(() -> {
+            WrappedPlayer.getPlayers().values().forEach(map -> {
+                WrappedPlayer player = map.get(p.getUniqueId());
+                if (player != null) {
+                    try {
+                        player.SaveAll();
+                    } catch (Exception e) {
+                        getLogger().severe("An error occurred while saving player data:");
+                        e.printStackTrace();
+                    }
+                }
+            });
+            WrappedPlayer.DestroyAll(p.getUniqueId());
+        });
     }
 
     @Override

@@ -2,6 +2,7 @@ package moe.protasis.yukicommons.bungeecord.impl.player;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import moe.protasis.yukicommons.api.display.IExperienceBar;
 import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.world.AABB;
@@ -51,6 +52,11 @@ public class BungeecordPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public Object GetHandle() {
+        return player;
+    }
+
+    @Override
     public boolean HasPermission(String perm) {
         return player.hasPermission(perm);
     }
@@ -67,6 +73,11 @@ public class BungeecordPlayerWrapper implements IAbstractPlayer {
 
     @Override
     public IScoreboard GetScoreboard() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IExperienceBar GetExperienceBar() {
         throw new UnsupportedOperationException();
     }
 

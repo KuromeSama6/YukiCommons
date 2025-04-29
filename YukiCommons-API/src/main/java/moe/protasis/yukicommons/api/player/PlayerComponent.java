@@ -13,7 +13,7 @@ import lombok.Setter;
  * 
  * @param <T> The type of this component's owner.
  */
-public abstract class PlayerComponent<T extends WrappedPlayer> {
+public abstract class PlayerComponent<T extends WrappedPlayer> implements IDataComponent {
     /**
      * The owner of this component.
      */
@@ -31,15 +31,18 @@ public abstract class PlayerComponent<T extends WrappedPlayer> {
      * for instance, from a database. It is advised to perform database query logic
      * in a blocking fashion in this method.
      */
-    protected void LoadData() {}
+    @Override
+    public void LoadData() {}
 
     /**
      * ASYNC. Called when this component is to have its data saved, for instance, to
      * a database. It is advised to perform database query logic in a blocking
      * fashion in this method.
      */
+    @Override
     public void Save() {}
 
+    public void OnReady(){}
     public void Destroy() {}
     public void Update() {}
     public EntityLoadType GetLoadType() {

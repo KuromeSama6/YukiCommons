@@ -11,6 +11,6 @@ public interface IAbstractLivingEntity extends IDestroyable {
      * @return The entity's name.
      */
     String GetName();
-
     AABB GetBoundingBox();
+    Object GetHandle();
 }

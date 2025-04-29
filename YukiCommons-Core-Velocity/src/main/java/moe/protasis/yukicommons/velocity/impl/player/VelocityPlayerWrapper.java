@@ -2,6 +2,7 @@ package moe.protasis.yukicommons.velocity.impl.player;
 
 import com.velocitypowered.api.proxy.Player;
 import lombok.AllArgsConstructor;
+import moe.protasis.yukicommons.api.display.IExperienceBar;
 import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.world.AABB;
@@ -50,7 +51,12 @@ public class VelocityPlayerWrapper implements IAbstractPlayer {
 
     @Override
     public IScoreboard GetScoreboard() {
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IExperienceBar GetExperienceBar() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -66,5 +72,10 @@ public class VelocityPlayerWrapper implements IAbstractPlayer {
     @Override
     public AABB GetBoundingBox() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object GetHandle() {
+        return player;
     }
 }

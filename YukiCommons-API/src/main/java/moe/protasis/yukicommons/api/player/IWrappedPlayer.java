@@ -2,7 +2,7 @@ package moe.protasis.yukicommons.api.player;
 
 import moe.protasis.yukicommons.api.entity.IAbstractLivingEntity;
 
-public interface IWrappedPlayer extends INamedHumanoid {
+public interface IWrappedPlayer extends INamedHumanoid, IDataComponent {
     IAbstractPlayer getPlayer();
 
     @Override

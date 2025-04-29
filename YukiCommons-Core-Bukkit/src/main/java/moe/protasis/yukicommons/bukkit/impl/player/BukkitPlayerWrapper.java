@@ -1,6 +1,7 @@
 package moe.protasis.yukicommons.bukkit.impl.player;
 
 import lombok.Getter;
+import moe.protasis.yukicommons.api.display.IExperienceBar;
 import moe.protasis.yukicommons.bukkit.impl.YukiCommonsBukkit;
 import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
@@ -13,10 +14,12 @@ public class BukkitPlayerWrapper implements IAbstractPlayer {
     @Getter
     private final Player player;
     private final BukkitPlayerScoreboard scoreboard;
+    private final BukkitPlayerExperienceBar experienceBar;
 
     public BukkitPlayerWrapper(final Player player) {
         this.player = player;
         scoreboard = new BukkitPlayerScoreboard(this);
+        experienceBar = new BukkitPlayerExperienceBar(this);
     }
 
     @Override
@@ -45,6 +48,11 @@ public class BukkitPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public Object GetHandle() {
+        return player;
+    }
+
+    @Override
     public double GetHealth() {
         return player.getHealth();
     }
@@ -70,8 +78,14 @@ public class BukkitPlayerWrapper implements IAbstractPlayer {
     }
 
     @Override
+    public IExperienceBar GetExperienceBar() {
+        return experienceBar;
+    }
+
+    @Override
     public void Destroy() {
         scoreboard.Destroy();
+        experienceBar.Destroy();
     }
 
     @Override

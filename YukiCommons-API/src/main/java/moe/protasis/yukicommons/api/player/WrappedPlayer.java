@@ -1,8 +1,8 @@
 package moe.protasis.yukicommons.api.player;
 
+import lombok.Setter;
 import moe.protasis.yukicommons.api.display.IScoreboard;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
-import moe.protasis.yukicommons.api.data.IDatabaseProvider;
 import moe.protasis.yukicommons.api.exception.LoginDeniedException;
 import lombok.Getter;
 import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
@@ -35,16 +35,10 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     @Getter
     protected UUID uuid;
     /**
-     * Whether this WrappedPlayer's data has been fully loaded (i.e. from a
-     * database).
+     * Whether the data of this WrappedPlayer is pristine. Players with pristine data are not saved when automatic saving is called. dataPristine will only be true when (a) a player has logged in and his data are not yet been loaded, or (b) the player has logged out and his data are already saved;
      */
-    @Getter
-    protected boolean dataReady;
-    /**
-     * Whether the async operations in any asynchronous login events has all been completed.
-     */
-    @Getter
-    protected boolean asyncLoginComplete;
+    @Getter @Setter
+    private boolean dataPristine = true;
     /**
      * The scheduler that this WrappedPlayer may use.
      */
@@ -59,12 +53,20 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     @Getter
     protected final Map<Class<?>, PlayerComponent<?>> components = new HashMap<>();
 
+    private boolean dataLoadBegun;
+
+    /**
+     * Creates a new WrappedPlayer object.
+     * <p>
+     * Any player components added in the constructor will be loaded when LoadData is called subsequently.
+     * @param player The player backing this WrappedPlayer object.
+     */
     public WrappedPlayer(IAbstractPlayer player) {
         this.player = player;
         uuid = player.GetUuid();
 
         if (!players.containsKey(getClass()))
-            players.put(getClass(), new HashMap<>());
+            players.put(getClass(), new ConcurrentHashMap<>());
         players.get(getClass()).put(uuid, this);
     }
 
@@ -105,68 +107,36 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * @see PlayerComponent
      */
     protected void AddComponent(PlayerComponent<?> component) {
+        if (dataLoadBegun) {
+            throw new IllegalStateException("Components can only be added in the constructor or before LoadData is called.");
+        }
+
         components.put(component.getClass(), component);
-
-        switch (component.GetLoadType()) {
-            case BLOCKING:
-                BlockingLoadComponent(component);
-                break;
-            case PRIORITY:
-            case REGULAR:
-                GetPlugin().GetScheduler().RunAsync(() -> BlockingLoadComponent(component));
-                break;
-        }
-    }
-
-    private void BlockingLoadComponent(PlayerComponent<?> component) {
-        try {
-            component.LoadData();
-            component.setDataReady(true);
-        } catch (Exception e) {
-            GetPlugin().GetLogger().severe(String.format("Error loading component %s for player %s:",
-                    component.getClass(), player.GetName()));
-            e.printStackTrace();
-        }
-    }
-
-    public void BlockingLoadData() {
-        if (dataReady)
-            throw new IllegalStateException();
-        switch (GetLoadType()) {
-            case BLOCKING:
-                dataReady = LoadData();
-                break;
-            case PRIORITY:
-            case REGULAR:
-                GetPlugin().GetScheduler().RunAsync(() -> dataReady = LoadData());
-                break;
-        }
     }
 
     /**
-     * Called when a player is attempting login. Login can be denied by overriding
-     * this method and throwing <code>LoginDeniedException</code>.
-     * 
-     * @throws LoginDeniedException When the login attempt is denied by this
-     *                              WrappedPlayer object.
+     * Loads the data for this WrappedPlayer object. This method is automatically called upon login. Throwing an error in this method causes the login attempted to be denied.
+     * <p>
+     * At the time that this method is called, the underlying IAbstractPlayer has not yet been fully initialized. The safety of any calls to the underlying IAbstractPlayer cannot be guaranteed and will lead to undefined behavior.
+     *
+     * @throws LoginDeniedException When the login attempt is denied by this WrappedPlayer object. A detailed reason message will be shown instead of the default error message.
+     * @throws Exception            When an error occurs while loading data.
      */
-    public void AttemptLogin() throws LoginDeniedException {
+    @Override
+    public void LoadData() throws Exception {
     }
 
     /**
-     * Loads the data for this WrappedPlayer object. It is not guaranteed that operations to the player object are safe, and thus such operations are not recommended.
-     * @return Whether the data was loaded successfully. Note that login rejections should be handled by the <code>AttemptLogin</code> method.
+     * Gets a list of data components related to this player. This list is used to determine what objects to save when a player logs in or out.
+     * <p>
+     * By default, this list contains the player instance itself, and all components that are registered to this player.
+     * @return A list of data components related to this player.
      */
-    protected boolean LoadData() {
-        return true;
-    }
-
-    /**
-     * @return Whether the <code>LoadData</code> method of this class should
-     *         be called asynchronously. Defaults to <code>true</code>.
-     */
-    protected EntityLoadType GetLoadType() {
-        return EntityLoadType.REGULAR;
+    public List<IDataComponent> GetDataComponents() {
+        var list = new ArrayList<IDataComponent>();
+        list.add(this);
+        list.addAll(components.values());
+        return list;
     }
 
     /**
@@ -175,18 +145,11 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     protected abstract IAbstractPlugin GetPlugin();
 
     /**
-     * Saves this WrappedPlayer's data. The implementation should silently if <code>dataReady</code> is
-     * false.
-     * The behavior of this method should be <b>blocking</b>.
+     * Saves this WrappedPlayer's data.
      */
-    public void Save() {}
-
-    /**
-     * @return The <code>IDatabaseProvider</code> that this WrappedPlayer shall use
-     *         when performing database-related operations.
-     * @see IDatabaseProvider
-     */
-    protected abstract IDatabaseProvider GetDatabaseProvider();
+    @Override
+    public void Save() throws Exception {
+    }
 
     /**
      * Destroys this WrappedPlayer object, saving it and all of its component first,
@@ -194,39 +157,19 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      */
     @Override
     public void Destroy() {
-        Destroy(true);
         scheduler.Free();
         player.Destroy();
-        if (GetScoreboard() != null) {
-            GetScoreboard().RemoveAllProviders();
-        }
-    }
-
-    public void Destroy(boolean save) {
-        if (dataReady && save) {
-            GetPlugin().GetScheduler().RunAsync(this::SaveAll);
-        }
-        players.get(getClass()).remove(uuid);
-    }
-
-    /**
-     * BLOCKING. Saves this WrappedPlayer and all of its components.
-     */
-    public void SaveAll() {
-        Save();
-        for (PlayerComponent<?> component : components.values()) {
+        components.values().forEach(c -> {
             try {
-                component.Save();
-                component.Destroy();
+                c.Destroy();
             } catch (Exception e) {
-                GetPlugin().GetLogger().severe(String.format("Error saving component %s for player %s:",
-                        component.getClass(), player.GetName()));
+                YukiCommonsApi.Get().GetLogger().severe("There was an error destroying %s for player %s.".formatted(c, uuid));
                 e.printStackTrace();
             }
-        }
+        });
     }
 
-    public void FinalizeConnection(IAbstractPlayer player) {
+    public final void FinalizeConnection(IAbstractPlayer player) {
         if (!(this.player instanceof PendingPlayerWrapper))
             throw new IllegalStateException();
         this.player = player;
@@ -256,12 +199,49 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * On BungeeCord, this is called after the <code>PostLoginEvent</code> is fired and <code>FinalizeConnection</code> is called on the wrapped player.
      */
     public void OnJoin() {
+        components.values().forEach(PlayerComponent::OnReady);
     }
 
     /**
      * Called after ALL WrappedPlayer instances registered by every plugin have been initialized.
      */
     public void OnPostInit() {}
+
+    public final synchronized void LoadAll() throws Exception {
+        dataLoadBegun = true;
+        var components = GetDataComponents();
+        components.sort(Comparator.comparingDouble(IDataComponent::GetNiceness));
+
+        for (var comp : components) {
+            try {
+                comp.LoadData();
+            } catch (LoginDeniedException e) {
+                throw e;
+
+            } catch (Exception e) {
+                GetPlugin().GetLogger().severe("There was an error loading %s for player %s.".formatted(comp, uuid));
+                throw new RuntimeException(e);
+            }
+        }
+
+        dataPristine = false;
+    }
+
+    public final synchronized void SaveAll() throws Exception {
+        var components = GetDataComponents();
+        components.sort(Comparator.comparingDouble(c -> -c.GetNiceness()));
+
+        for (var comp : components) {
+            try {
+                comp.Save();
+            } catch (Exception e) {
+                GetPlugin().GetLogger().severe("There was an error saving %s for player %s.".formatted(comp, uuid));
+                throw e;
+            }
+        }
+
+        dataPristine = true;
+    }
 
     public IScoreboard GetScoreboard() {
         return player.GetScoreboard();
@@ -308,7 +288,13 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     public static void DestroyAll(UUID uuid) {
         for (Map<UUID, WrappedPlayer> map : players.values()) {
             if (map.containsKey(uuid)) {
-                map.get(uuid).Destroy();
+                try {
+                    map.get(uuid).Destroy();
+                } catch (Exception e) {
+                    YukiCommonsApi.Get().GetLogger().severe("There was an error destroying player %s.".formatted(uuid));
+                    e.printStackTrace();
+                }
+                map.remove(uuid);
             }
         }
     }
