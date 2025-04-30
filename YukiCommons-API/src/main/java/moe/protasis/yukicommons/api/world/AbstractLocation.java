@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class AbstractLocation {
-    private final String world;
-    private final double x, y, z, yaw, pitch;
+    private String world;
+    private double x, y, z, yaw, pitch;
 }

@@ -199,6 +199,23 @@ public class JsonWrapper {
         return Set(path, gson.toJsonTree(obj));
     }
 
+    public JsonWrapper Remove(String path) {
+        JsonElement parent = ResolvePath(path);
+        if (parent == null || !parent.isJsonObject())
+            throw new IllegalArgumentException("Path must be a JsonObject!");
+
+        String[] args = path.split("\\.");
+        String property = args[args.length - 1];
+        for (int i = 0; i < args.length - 1; i++) {
+            String name = args[i];
+            if (!parent.getAsJsonObject().has(name)) return this;
+            parent = parent.getAsJsonObject().get(name);
+        }
+
+        parent.getAsJsonObject().remove(property);
+        return this;
+    }
+
     public void Save(File file) {
         file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file)){
