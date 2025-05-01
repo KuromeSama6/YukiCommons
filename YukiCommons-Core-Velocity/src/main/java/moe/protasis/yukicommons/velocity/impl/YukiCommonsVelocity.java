@@ -19,6 +19,7 @@ import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.PendingPlayerWrapper;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
+import moe.protasis.yukicommons.util.Util;
 import moe.protasis.yukicommons.velocity.impl.adapter.VelocityAdaptor;
 import moe.protasis.yukicommons.velocity.impl.command.VelocityCommandProvider;
 import moe.protasis.yukicommons.util.YukiCommonsApi;
@@ -113,7 +114,8 @@ public class YukiCommonsVelocity implements IYukiCommons {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
                 player.FinalizeConnection(new VelocityPlayerWrapper(e.getPlayer()));
-                player.OnJoin();
+                Util.SafeCall(player::OnReady);
+                Util.SafeCall(player::OnJoin);
             }
         }
     }
@@ -124,6 +126,13 @@ public class YukiCommonsVelocity implements IYukiCommons {
     }
 
     private void DestroyPlayer(Player p) {
+        for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+            WrappedPlayer player = map.get(p.getUniqueId());
+            if (player != null) {
+                Util.SafeCall(player::OnLogout);
+            }
+        }
+
         server.getScheduler().buildTask(this, () -> {
             for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
                 WrappedPlayer player = map.get(p.getUniqueId());
@@ -134,8 +143,8 @@ public class YukiCommonsVelocity implements IYukiCommons {
                         e.printStackTrace();
                     }
                 }
+                WrappedPlayer.DestroyAll(p.getUniqueId());
             }
-            WrappedPlayer.DestroyAll(p.getUniqueId());
         })
         .schedule();
     }

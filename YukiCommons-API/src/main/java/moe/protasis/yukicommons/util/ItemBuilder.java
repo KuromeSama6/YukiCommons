@@ -2,6 +2,7 @@ package moe.protasis.yukicommons.util;
 
 import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -59,6 +60,16 @@ public class ItemBuilder {
         if (version == null) return this;
 
         item = version.SetUnbreakable(item, unbreakable);
+        return this;
+    }
+
+    public ItemBuilder SetBlockColor(DyeColor color) {
+        item.setDurability(color.getWoolData());
+        return this;
+    }
+
+    public ItemBuilder SetDyeColor(DyeColor color) {
+        item.setDurability(color.getDyeData());
         return this;
     }
 

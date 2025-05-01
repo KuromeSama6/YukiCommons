@@ -11,6 +11,7 @@ import moe.protasis.yukicommons.api.player.AutoPlayerLoadData;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.bungeecord.impl.player.BungeecordPlayerWrapper;
+import moe.protasis.yukicommons.util.Util;
 import moe.protasis.yukicommons.util.YukiCommonsApi;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -103,7 +104,8 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
                 player.FinalizeConnection(new BungeecordPlayerWrapper(e.getPlayer()));
-                player.OnJoin();
+                Util.SafeCall(player::OnReady);
+                Util.SafeCall(player::OnJoin);
             }
         }
     }
@@ -114,6 +116,12 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
     }
 
     private void DestroyPlayer(ProxiedPlayer p) {
+        for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+            WrappedPlayer player = map.get(p.getUniqueId());
+            if (player != null) {
+                Util.SafeCall(player::OnLogout);
+            }
+        }
         ProxyServer.getInstance().getScheduler().runAsync(this, () -> {
             for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
                 WrappedPlayer player = map.get(p.getUniqueId());

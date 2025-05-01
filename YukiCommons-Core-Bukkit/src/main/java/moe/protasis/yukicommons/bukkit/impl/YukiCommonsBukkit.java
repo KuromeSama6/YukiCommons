@@ -143,6 +143,7 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
         WrappedPlayer.getPlayers().values().forEach(map -> {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
+                Util.SafeCall(player::OnReady);
                 Util.SafeCall(player::OnJoin);
             }
         });
@@ -154,6 +155,12 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
     }
 
     private void DestroyPlayer(Player p) {
+        for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
+            WrappedPlayer player = map.get(p.getUniqueId());
+            if (player != null) {
+                Util.SafeCall(player::OnLogout);
+            }
+        }
         CompletableFuture.runAsync(() -> {
             WrappedPlayer.getPlayers().values().forEach(map -> {
                 WrappedPlayer player = map.get(p.getUniqueId());

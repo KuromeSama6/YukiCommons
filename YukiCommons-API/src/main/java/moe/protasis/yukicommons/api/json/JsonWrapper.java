@@ -280,6 +280,10 @@ public class JsonWrapper {
         return ret;
     }
 
+    public JsonWrapper Clone() {
+        return new JsonWrapper(json.deepCopy());
+    }
+
     @Override
     public String toString() {
         return gson.toJson(json);

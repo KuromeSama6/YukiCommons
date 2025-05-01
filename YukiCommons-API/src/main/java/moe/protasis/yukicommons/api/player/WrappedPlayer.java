@@ -194,6 +194,13 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     }
 
     /**
+     * Called when the player has joined the server, but before OnReady is called on player components.
+     */
+    public void OnReady() {
+
+    }
+
+    /**
      * Called after the player has joined the server, and operations to the player object are safe.
      * On Bukkit, this is called after the <code>PlayerJoinEvent</code> is fired.
      * On BungeeCord, this is called after the <code>PostLoginEvent</code> is fired and <code>FinalizeConnection</code> is called on the wrapped player.
@@ -206,6 +213,15 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * Called after ALL WrappedPlayer instances registered by every plugin have been initialized.
      */
     public void OnPostInit() {}
+
+    /**
+     * Called when the player has logged out and is about to be destroyed, but before data is saved. OnLogout is always called on the main/server thread.
+     * <p>
+     * OnLogout will be called on each WrapperPlayer instance that logged out before SaveAll is called. Use this to finalize changes that needs to be done on the main thread before the player is destroyed.
+     */
+    public void OnLogout() {
+
+    }
 
     public final synchronized void LoadAll() throws Exception {
         dataLoadBegun = true;
