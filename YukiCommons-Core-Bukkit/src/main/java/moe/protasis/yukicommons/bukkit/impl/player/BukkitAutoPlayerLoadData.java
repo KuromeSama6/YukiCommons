@@ -1,5 +1,7 @@
 package moe.protasis.yukicommons.bukkit.impl.player;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import moe.protasis.yukicommons.bukkit.impl.YukiCommonsBukkit;
@@ -11,18 +13,24 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
 public class BukkitAutoPlayerLoadData extends AutoPlayerLoadData implements Listener {
+    private static final List<Class<? extends Event>> PREVENT_DOUBLE_CALL = ImmutableList.of(
+        EntityDamageEvent.class, EntityDamageByBlockEvent.class, EntityDamageByEntityEvent.class
+    );
     @Getter
     private final Listener dummyListener = new DummyListener();
     private final Set<Class<? extends Event>> adaptationFailedWarnings = new HashSet<>();
-    private final Set<Class<? extends Event>> multipleCallWarnings = new HashSet<>();
     private final Set<Class<? extends Event>> calledThisFrame = new HashSet<>();
 
     public BukkitAutoPlayerLoadData(Class<? extends WrappedPlayer> playerClass, IAbstractPlugin plugin) {
@@ -38,7 +46,7 @@ public class BukkitAutoPlayerLoadData extends AutoPlayerLoadData implements List
     }
 
     @Override
-    protected void RegisterEvent(Class<?> eventClass, Method method, IAbstractPlugin plugin) {
+    protected synchronized void RegisterEvent(Class<?> eventClass, Method method, IAbstractPlugin plugin) {
         if (!Event.class.isAssignableFrom(eventClass))
             throw new IllegalArgumentException("Event class must be a subclass of org.bukkit.event.Event");
         if (!(plugin.GetPlugin() instanceof Plugin))
@@ -56,7 +64,7 @@ public class BukkitAutoPlayerLoadData extends AutoPlayerLoadData implements List
                 annotation != null && annotation.ignoreCancelled()
         );
 
-//        log.info("Registered event handler for {} on {}@{}", eventClass.getName(), method.getName(), method.getDeclaringClass());
+//        System.out.println("Registered event handler for %s on %s@%s".formatted(eventClass.getName(), method.getName(), method.getDeclaringClass()));
     }
 
     private void CallEvent(Listener listener, Event event) {
@@ -69,6 +77,13 @@ public class BukkitAutoPlayerLoadData extends AutoPlayerLoadData implements List
 //            return;
 //        }
 //        calledThisFrame.add(event.getClass());
+
+        if (PREVENT_DOUBLE_CALL.contains(event.getClass())) {
+            if (calledThisFrame.contains(event.getClass())) {
+                return;
+            }
+            calledThisFrame.add(event.getClass());
+        }
 
         var player = YukiCommonsBukkit.getInstance().getAdaptor().AdaptToPlayer(event);
         if (player == null) {

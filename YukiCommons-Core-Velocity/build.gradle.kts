@@ -22,6 +22,7 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://libraries.minecraft.net")
     mavenCentral()
 }
 
@@ -37,6 +38,7 @@ dependencies {
     implementation("io.github.classgraph:classgraph:4.8.174")
     implementation("org.apache.ant:ant:1.10.15")
     implementation("com.zaxxer:HikariCP:4.0.3")
+    implementation("com.mojang:brigadier:1.0.18")
 
     implementation(project(":yukicommons-api"))
     implementation(project(":yukicommons-common"))

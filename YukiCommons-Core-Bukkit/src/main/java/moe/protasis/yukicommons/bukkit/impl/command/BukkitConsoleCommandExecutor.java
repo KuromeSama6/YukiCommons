@@ -25,6 +25,11 @@ public class BukkitConsoleCommandExecutor implements IAbstractCommandExecutor {
     }
 
     @Override
+    public boolean HasPermission(String permission) {
+        return true;
+    }
+
+    @Override
     public IAbstractPlayer GetPlayer() {
         return null;
     }

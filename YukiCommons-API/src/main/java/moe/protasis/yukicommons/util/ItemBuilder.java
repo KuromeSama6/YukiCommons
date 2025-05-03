@@ -1,6 +1,7 @@
 package moe.protasis.yukicommons.util;
 
 import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -35,6 +36,9 @@ public class ItemBuilder {
 
     public ItemBuilder SetDisplay(String str) {
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+        }
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', str));
         item.setItemMeta(meta);
         return this;
@@ -42,6 +46,9 @@ public class ItemBuilder {
 
     public ItemBuilder SetLore(String... lores) {
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+        }
         List<String> current = meta.getLore();
         if (current == null) current = new ArrayList<>();
         current.addAll(Arrays.stream(lores).map(c -> ChatColor.translateAlternateColorCodes('&', c)).collect(Collectors.toList()));

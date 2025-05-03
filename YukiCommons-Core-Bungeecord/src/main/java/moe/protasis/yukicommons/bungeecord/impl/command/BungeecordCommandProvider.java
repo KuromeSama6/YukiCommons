@@ -2,6 +2,9 @@ package moe.protasis.yukicommons.bungeecord.impl.command;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import moe.protasis.yukicommons.api.command.IBrigadierCommand;
 import moe.protasis.yukicommons.bungeecord.impl.YukiCommonsBungee;
 import moe.protasis.yukicommons.api.command.CommandProvider;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
@@ -21,64 +24,30 @@ import org.apache.tools.ant.types.Commandline;
 import java.util.Arrays;
 
 public class BungeecordCommandProvider extends CommandProvider {
+    private final CommandDispatcher<IAbstractCommandExecutor> dispatcher = new CommandDispatcher<>();
+
     @Override
     protected ICommandHandler<?> RegisterCommand(Class<?> clazz, IAbstractPlugin plugin) throws Exception {
         if (!(plugin instanceof Plugin))
             throw new IllegalArgumentException(String.format("IAbstractPlugin (%s) passed in must be an inheritor of Plugin!", plugin.getClass()));
 
         ICommandHandler<?> handler = (ICommandHandler<?>)clazz.getDeclaredConstructor().newInstance();
-        ProxyServer.getInstance().getPluginManager().registerCommand((Plugin)plugin, new Handler(handler));
+        ProxyServer.getInstance().getPluginManager().registerCommand((Plugin)plugin, new BungeecordCommandHandler(handler));
         return handler;
     }
 
-    private static class Handler extends Command {
-        private final ICommandHandler<?> handler;
+    @Override
+    protected IBrigadierCommand RegisterBrigadierCommand(Class<?> clazz, IAbstractPlugin plugin) throws Exception {
+        var handler = (IBrigadierCommand)clazz.getDeclaredConstructor().newInstance();
 
-        public Handler(ICommandHandler<?> handler) {
-            super(handler.GetName(), handler.GetPermission(), handler.GetAliases());
-            this.handler = handler;
-        }
+        LiteralArgumentBuilder<IAbstractCommandExecutor> builder = LiteralArgumentBuilder.literal(handler.GetName());
+        builder.requires(c -> handler.GetPermission() == null || c.HasPermission(handler.GetPermission()));
+        handler.Build(builder);
 
-        @Override
-        public void execute(CommandSender commandSender, String[] strings) {
-            Object parameter = handler.CreateParameterObject();
-            IAbstractCommandExecutor executor = YukiCommonsBungee.getInstance().getAdaptor().AdaptToCommandExecutor(commandSender);
+        dispatcher.register(builder);
 
-            try {
-                var jCommander = JCommander.newBuilder()
-                        .expandAtSign(false)
-                        .addObject(parameter)
-                        .build();
+        ProxyServer.getInstance().getPluginManager().registerCommand((Plugin)plugin, new BungeecordBrigadierCommandHandler(handler, dispatcher));
 
-                jCommander.parse(Commandline.translateCommandline(String.join(" ", strings)));
-                handler.Handle(executor, parameter);
-
-            } catch (InvalidCommandException e) {
-              commandSender.sendMessage(new TextComponent(e.getMessage()));
-
-            } catch (ParameterException e) {
-                handler.OnError(executor, e);
-
-            } catch (OperationNotPermittedException e) {
-                commandSender.sendMessage(new TextComponent("Operation not permitted"));
-
-            } catch (PermissionDeniedException e) {
-                commandSender.sendMessage(new TextComponent("Permission denied"));
-
-                YukiCommonsBungee.getInstance().getLogger().warning(String.format("Permission denied for %s whilst executing command %s:", commandSender.getName(),
-                        Arrays.toString(strings)));
-                e.printStackTrace();
-
-            } catch (CommandExecutionException e) {
-                commandSender.sendMessage(new TextComponent("The command was not executed correctly."));
-                YukiCommonsBungee.getInstance().getLogger().severe(String.format("Error for %s whilst executing command %s:", commandSender.getName(),
-                        Arrays.toString(strings)));
-                e.printStackTrace();
-
-            } catch (Exception e) {
-                commandSender.sendMessage(new TextComponent("The command was not executed correctly: An internal error occured while executing this command."));
-                e.printStackTrace();
-            }
-        }
+        return handler;
     }
 }

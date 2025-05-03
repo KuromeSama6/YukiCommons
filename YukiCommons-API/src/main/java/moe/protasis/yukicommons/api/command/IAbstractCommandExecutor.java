@@ -23,6 +23,19 @@ public interface IAbstractCommandExecutor {
      */
     void SendMessage(String message);
 
+    default boolean HasPermission(String permission) {
+        return IsConsole() || GetPlayer().HasPermission(permission);
+    }
+
+    default String GetName() {
+        if (IsPlayer()) {
+            return GetPlayer().GetName();
+        } else if (IsConsole()) {
+            return "*CONSOLE*";
+        }
+        throw new IllegalStateException("Unknown command executor type");
+    }
+
     /**
      * Gets the underlying abstract player of this command executor.
      * 

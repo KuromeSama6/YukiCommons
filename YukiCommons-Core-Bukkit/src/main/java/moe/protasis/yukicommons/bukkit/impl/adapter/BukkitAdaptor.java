@@ -24,6 +24,7 @@ public class BukkitAdaptor implements IAdaptor {
         if (obj instanceof IWrappedPlayer) return ((IWrappedPlayer)obj).GetPlayer();
         if (obj instanceof IAbstractPlayer) return (IAbstractPlayer)obj;
         if (obj instanceof Player) return new BukkitPlayerWrapper((Player)obj);
+        if (obj instanceof IAbstractCommandExecutor executor) return AdaptToPlayer(executor.GetPlayer());
         if (obj instanceof PlayerEvent) return AdaptToPlayer(((PlayerEvent)obj).getPlayer());
         if (obj instanceof EntityEvent) return AdaptToPlayer(((EntityEvent)obj).getEntity());
 

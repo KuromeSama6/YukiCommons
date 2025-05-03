@@ -21,6 +21,7 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
+    maven("https://libraries.minecraft.net")
     mavenCentral()
 }
 
@@ -36,6 +37,7 @@ dependencies {
     implementation("org.apache.ant:ant:1.10.15")
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("fr.mrmicky:fastboard:2.1.4")
+    implementation("com.mojang:brigadier:1.0.18")
 
     implementation(project(":yukicommons-api"))
     implementation(project(":yukicommons-common"))

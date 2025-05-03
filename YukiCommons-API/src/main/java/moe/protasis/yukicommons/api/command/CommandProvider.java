@@ -1,5 +1,7 @@
 package moe.protasis.yukicommons.api.command;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -43,9 +45,22 @@ public abstract class CommandProvider {
                     plugin.GetLogger().warning(String.format("Could not register command %s because it does not extend ICommandHandler!", clazz));
                 }
             }
+
+            for (ClassInfo info : result.getClassesImplementing(IBrigadierCommand.class)) {
+                if (!info.isStandardClass() || info.isAbstract()) continue;
+                try {
+                    var handler = RegisterBrigadierCommand(info.loadClass(), plugin);
+                    if (handler != null) {
+                        plugin.GetLogger().info(String.format("Registered brigadier command %s", handler.GetName()));
+                    }
+                } catch (Exception e) {
+                    plugin.GetLogger().severe(String.format("An error occured while registering brigadier command %s", info.getName()));
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     protected abstract ICommandHandler<?> RegisterCommand(Class<?> clazz, IAbstractPlugin plugin) throws Exception;
-
+    protected abstract IBrigadierCommand RegisterBrigadierCommand(Class<?> clazz, IAbstractPlugin plugin) throws Exception;
 }

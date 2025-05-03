@@ -296,6 +296,9 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     }
 
     public static <T extends WrappedPlayer> List<T> GetAllPlayers(Class<T> clazz) {
+        if (!players.containsKey(clazz)) {
+            return new ArrayList<>();
+        }
         return players.get(clazz).values().stream()
                 .map(c -> (T) c)
                 .collect(Collectors.toList());

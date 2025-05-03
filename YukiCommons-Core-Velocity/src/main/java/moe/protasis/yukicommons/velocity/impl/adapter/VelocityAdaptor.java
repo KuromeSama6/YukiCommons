@@ -19,6 +19,7 @@ public class VelocityAdaptor implements IAdaptor {
         if (obj instanceof IWrappedPlayer) return ((IWrappedPlayer)obj).GetPlayer();
         if (obj instanceof IAbstractPlayer) return (IAbstractPlayer)obj;
         if (obj instanceof Player p) return new VelocityPlayerWrapper(p);
+        if (obj instanceof IAbstractCommandExecutor executor) return AdaptToPlayer(executor.GetPlayer());
         if (obj instanceof UUID) return AdaptToPlayer(YukiCommonsVelocity.getInstance().getServer().getPlayer((UUID)obj));
 
         return null;

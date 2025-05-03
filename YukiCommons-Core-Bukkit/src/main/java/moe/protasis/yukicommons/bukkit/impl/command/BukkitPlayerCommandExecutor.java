@@ -24,6 +24,11 @@ public class BukkitPlayerCommandExecutor implements IAbstractCommandExecutor {
     }
 
     @Override
+    public boolean HasPermission(String permission) {
+        return player.HasPermission(permission);
+    }
+
+    @Override
     public IAbstractPlayer GetPlayer() {
         return player;
     }

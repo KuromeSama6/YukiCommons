@@ -10,13 +10,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public abstract class AutoPlayerLoadData {
     @Getter
     private final Class<? extends WrappedPlayer> playerClass;
     @Getter
-    private final Map<Class<?>, Method> playerEventHandlers = new HashMap<>();
+    private final Map<Class<?>, Method> playerEventHandlers = new ConcurrentHashMap<>();
 
     public AutoPlayerLoadData(Class<? extends WrappedPlayer> playerClass, IAbstractPlugin plugin) {
 //        log.info("Loading player class {}", playerClass.getName());

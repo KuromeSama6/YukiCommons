@@ -8,4 +8,12 @@ public class CommandExecutionException extends RuntimeException {
         super(msg);
     }
 
+    public CommandExecutionException(Throwable cause) {
+        super(cause);
+    }
+
+    public CommandExecutionException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
 }

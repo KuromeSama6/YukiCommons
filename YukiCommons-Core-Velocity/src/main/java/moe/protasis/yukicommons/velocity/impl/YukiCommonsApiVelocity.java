@@ -1,5 +1,8 @@
 package moe.protasis.yukicommons.velocity.impl;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import moe.protasis.yukicommons.api.IYukiCommonsAPI;
 import moe.protasis.yukicommons.api.adapter.IAdaptor;
 import moe.protasis.yukicommons.api.json.IJsonTypeAdapter;

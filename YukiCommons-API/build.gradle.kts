@@ -16,6 +16,7 @@ java {
 repositories {
     mavenLocal()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    maven("https://libraries.minecraft.net")
     mavenCentral()
 }
 
@@ -32,6 +33,7 @@ dependencies {
     implementation("io.github.classgraph:classgraph:4.8.174")
     implementation("org.apache.ant:ant:1.10.15")
     implementation("com.zaxxer:HikariCP:4.0.3")
+    implementation("com.mojang:brigadier:1.0.18")
 
     compileOnly("moe.protasis:yukicommons-api:1.2.0")
 

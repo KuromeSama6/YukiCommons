@@ -13,6 +13,7 @@ java {
 
 repositories {
     mavenLocal()
+    maven("https://libraries.minecraft.net")
 }
 
 dependencies {
