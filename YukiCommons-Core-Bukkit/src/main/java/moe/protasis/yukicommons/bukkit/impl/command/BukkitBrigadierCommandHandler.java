@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 @AllArgsConstructor
 public class BukkitBrigadierCommandHandler implements CommandExecutor, TabCompleter {
     private final CommandDispatcher<IAbstractCommandExecutor> dispatcher;
+    private final IBrigadierCommand cmd;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
@@ -46,7 +47,7 @@ public class BukkitBrigadierCommandHandler implements CommandExecutor, TabComple
         } catch (CommandSyntaxException e) {
             commandSender.sendMessage("There was an error executing the command: %s".formatted(e.getMessage()));
             commandSender.sendMessage(ChatColor.DARK_AQUA + "Usage:");
-            dispatcher.getSmartUsage(dispatcher.getRoot(), executor).values().forEach(c -> commandSender.sendMessage(ChatColor.GRAY + "- " + c));
+            dispatcher.getSmartUsage(dispatcher.getRoot().getChild(cmd.GetName()), executor).values().forEach(c -> commandSender.sendMessage(ChatColor.GRAY + "- " + c));
 
         } catch (OperationNotPermittedException e) {
             commandSender.sendMessage("Operation not permitted");

@@ -16,6 +16,8 @@ public class BukkitScheduler implements IAbstractScheduler {
 
     @Override
     public int ScheduleSyncRepeatingTask(Runnable func, long delay, long interval) {
+//        System.out.println("scheduler: %s, func: %s, delay: %s, interval: %s".formatted(pl.getName(), func, delay, interval));
+//        new Exception("Scheduler call stack trace").printStackTrace();
         return Bukkit.getScheduler().scheduleSyncRepeatingTask(pl, func, delay, interval);
     }
 

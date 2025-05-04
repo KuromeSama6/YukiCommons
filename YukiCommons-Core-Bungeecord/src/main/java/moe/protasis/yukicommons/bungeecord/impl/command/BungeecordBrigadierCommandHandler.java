@@ -20,10 +20,12 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 import java.util.Arrays;
 
 public class BungeecordBrigadierCommandHandler extends Command implements TabExecutor {
+    private final IBrigadierCommand cmd;
     private final CommandDispatcher<IAbstractCommandExecutor> dispatcher;
 
     public BungeecordBrigadierCommandHandler(IBrigadierCommand cmd, CommandDispatcher<IAbstractCommandExecutor> dispatcher) {
         super(cmd.GetName(), cmd.GetPermission(), cmd.GetAliases());
+        this.cmd = cmd;
         this.dispatcher = dispatcher;
     }
 
@@ -38,7 +40,7 @@ public class BungeecordBrigadierCommandHandler extends Command implements TabExe
         } catch (CommandSyntaxException e) {
             commandSender.sendMessage(new TextComponent("There was an error executing the command: %s".formatted(e.getMessage())));
             commandSender.sendMessage(ChatColor.DARK_AQUA + "Usage:");
-            dispatcher.getSmartUsage(dispatcher.getRoot(), executor).values().forEach(c -> commandSender.sendMessage(ChatColor.GRAY + "- " + c));
+            dispatcher.getSmartUsage(dispatcher.getRoot().getChild(cmd.GetName()), executor).values().forEach(c -> commandSender.sendMessage(ChatColor.GRAY + "- " + c));
 
         } catch (OperationNotPermittedException e) {
             commandSender.sendMessage(new TextComponent("Operation not permitted"));

@@ -113,7 +113,7 @@ public class YukiCommonsVelocity implements IYukiCommons {
         for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
-                player.FinalizeConnection(new VelocityPlayerWrapper(e.getPlayer()));
+                player.FinalizeConnection(VelocityPlayerWrapper.Get(e.getPlayer()));
                 Util.SafeCall(player::OnReady);
                 Util.SafeCall(player::OnJoin);
             }

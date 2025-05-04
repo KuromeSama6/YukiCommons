@@ -103,7 +103,7 @@ public class YukiCommonsBungee extends Plugin implements Listener, IYukiCommons 
         for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
-                player.FinalizeConnection(new BungeecordPlayerWrapper(e.getPlayer()));
+                player.FinalizeConnection(BungeecordPlayerWrapper.Get(e.getPlayer()));
                 Util.SafeCall(player::OnReady);
                 Util.SafeCall(player::OnJoin);
             }

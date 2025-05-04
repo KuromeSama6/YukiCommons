@@ -2,14 +2,16 @@ package moe.protasis.yukicommons.api.player;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import moe.protasis.yukicommons.api.misc.IDestroyable;
 import moe.protasis.yukicommons.api.nms.event.PlayerEventHandler;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.util.Util;
+import org.bukkit.Bukkit;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -51,18 +53,21 @@ public abstract class AutoPlayerLoadData {
     protected abstract void RegisterEvent(Class<?> eventClass, Method method, IAbstractPlugin plugin);
 
     protected void CallEventMethod(IAbstractPlayer player, Object event) {
-        Method method = playerEventHandlers.get(event.getClass());
+        for (var clazz : playerEventHandlers.keySet()) {
+            if (clazz.equals(event.getClass())) {
+                Method method = playerEventHandlers.get(event.getClass());
 
-        if (method == null) return;
-        try {
-            WrappedPlayer wp = WrappedPlayer.GetPlayer(player, playerClass);
-            if (wp == null) {
-//                log.warn("CallEventMethod player is null!! abstractPlayer: {}, class: {}", player, playerClass);
-                return;
+                if (method == null) continue;
+                try {
+                    WrappedPlayer wp = WrappedPlayer.GetPlayer(player, playerClass);
+                    if (wp == null) continue;
+                    method.invoke(wp, event);
+
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    Bukkit.getLogger().severe("Failed to call event handler for " + event.getClass().getName() + " on " + player.GetName());
+                    e.printStackTrace();
+                }
             }
-            method.invoke(wp, event);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
         }
     }
 }

@@ -18,7 +18,7 @@ public class BungeecordAdaptor implements IAdaptor {
     public IAbstractPlayer AdaptToPlayer(Object obj) {
         if (obj instanceof IWrappedPlayer) return ((IWrappedPlayer)obj).GetPlayer();
         if (obj instanceof IAbstractPlayer) return (IAbstractPlayer)obj;
-        if (obj instanceof ProxiedPlayer) return new BungeecordPlayerWrapper((ProxiedPlayer)obj);
+        if (obj instanceof ProxiedPlayer) return BungeecordPlayerWrapper.Get((ProxiedPlayer)obj);
         if (obj instanceof PendingConnection conn) return new PendingPlayerWrapper((conn).getUniqueId(), conn.getName());
         if (obj instanceof IAbstractCommandExecutor executor) return AdaptToPlayer(executor.GetPlayer());
         if (obj instanceof UUID) return AdaptToPlayer(ProxyServer.getInstance().getPlayer((UUID)obj));

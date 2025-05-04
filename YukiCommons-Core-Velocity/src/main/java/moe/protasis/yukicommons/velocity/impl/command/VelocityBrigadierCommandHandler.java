@@ -40,7 +40,7 @@ public class VelocityBrigadierCommandHandler implements RawCommand {
         } catch (CommandSyntaxException e) {
             executor.SendMessage("There was an error executing the command: %s".formatted(e.getMessage()));
             invocation.source().sendMessage(Component.text("Usage: ").color(DARK_AQUA));
-            dispatcher.getSmartUsage(dispatcher.getRoot(), executor).values().forEach(c -> invocation.source().sendMessage(Component.text("- " + c).color(GRAY)));
+            dispatcher.getSmartUsage(dispatcher.getRoot().getChild(cmd.GetName()), executor).values().forEach(c -> invocation.source().sendMessage(Component.text("- " + c).color(GRAY)));
 
         } catch (OperationNotPermittedException e) {
             executor.SendMessage("Operation not permitted");
@@ -84,6 +84,6 @@ public class VelocityBrigadierCommandHandler implements RawCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission(cmd.GetPermission());
+        return cmd.GetPermission() == null || invocation.source().hasPermission(cmd.GetPermission());
     }
 }

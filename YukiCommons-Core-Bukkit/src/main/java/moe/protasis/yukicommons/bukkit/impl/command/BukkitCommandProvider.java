@@ -53,7 +53,7 @@ public class BukkitCommandProvider extends CommandProvider {
 
         dispatcher.register(builder);
 
-        var commandHandler = new BukkitBrigadierCommandHandler(dispatcher);
+        var commandHandler = new BukkitBrigadierCommandHandler(dispatcher, handler);
         command.setExecutor(commandHandler);
         command.setTabCompleter(commandHandler);
 

@@ -8,18 +8,31 @@ import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 import moe.protasis.yukicommons.api.world.AABB;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class BukkitPlayerWrapper implements IAbstractPlayer {
+    private static final Map<UUID, BukkitPlayerWrapper> pool = new HashMap<>();
+
     @Getter
     private final Player player;
     private final BukkitPlayerScoreboard scoreboard;
     private final BukkitPlayerExperienceBar experienceBar;
 
-    public BukkitPlayerWrapper(final Player player) {
+    private BukkitPlayerWrapper(final Player player) {
         this.player = player;
         scoreboard = new BukkitPlayerScoreboard(this);
         experienceBar = new BukkitPlayerExperienceBar(this);
+    }
+
+    public static BukkitPlayerWrapper Get(final Player player) {
+        if (pool.containsKey(player.getUniqueId())) {
+            return pool.get(player.getUniqueId());
+        }
+        BukkitPlayerWrapper wrapper = new BukkitPlayerWrapper(player);
+        pool.put(player.getUniqueId(), wrapper);
+        return wrapper;
     }
 
     @Override
@@ -86,6 +99,7 @@ public class BukkitPlayerWrapper implements IAbstractPlayer {
     public void Destroy() {
         scoreboard.Destroy();
         experienceBar.Destroy();
+        pool.remove(player.getUniqueId());
     }
 
     @Override

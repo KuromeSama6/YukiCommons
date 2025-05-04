@@ -66,7 +66,7 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
 
         new BukkitCommandProvider();
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, this::OnTick, 0, 1);
+        scheduler.ScheduleSyncRepeatingTask(this::OnTick, 0, 1);
 
         packetEventsEnabled = Bukkit.getPluginManager().isPluginEnabled("PacketEvents");
         if (!packetEventsEnabled) {
@@ -132,7 +132,7 @@ public class YukiCommonsBukkit extends JavaPlugin implements Listener, IYukiComm
         for (Map<UUID, WrappedPlayer> map : WrappedPlayer.getPlayers().values()) {
             WrappedPlayer player = map.get(e.getPlayer().getUniqueId());
             if (player != null) {
-                player.FinalizeConnection(new BukkitPlayerWrapper(e.getPlayer()));
+                player.FinalizeConnection(BukkitPlayerWrapper.Get(e.getPlayer()));
             }
         }
     }

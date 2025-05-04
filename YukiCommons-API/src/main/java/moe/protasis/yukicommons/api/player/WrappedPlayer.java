@@ -167,6 +167,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
                 e.printStackTrace();
             }
         });
+        components.clear();
     }
 
     public final void FinalizeConnection(IAbstractPlayer player) {
