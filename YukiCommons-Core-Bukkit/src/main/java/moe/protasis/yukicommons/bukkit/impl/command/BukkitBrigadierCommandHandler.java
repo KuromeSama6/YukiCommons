@@ -35,9 +35,9 @@ public class BukkitBrigadierCommandHandler implements CommandExecutor, TabComple
 
         String str;
         if (strings.length == 0) {
-            str = s;
+            str = command.getLabel();
         } else {
-            str = "%s %s".formatted(s, String.join(" ", strings));
+            str = "%s %s".formatted(command.getLabel(), String.join(" ", strings));
         }
 
         try {
