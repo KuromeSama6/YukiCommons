@@ -29,7 +29,7 @@ public class VelocityBrigadierCommandHandler implements RawCommand {
     public void execute(Invocation invocation) {
         var executor = YukiCommonsVelocity.getInstance().getAdaptor().AdaptToCommandExecutor(invocation.source());
         var args = invocation.arguments();
-        String str = invocation.alias();
+        String str = cmd.GetName();
         if (!args.isEmpty()) {
             str += " " + args;
         }

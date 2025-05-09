@@ -82,6 +82,10 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
         return (T) components.get(clazz);
     }
 
+    public PlayerComponent<?> GetComponentUnsafe(Class<?> clazz) {
+        return components.get(clazz);
+    }
+
     public <T extends PlayerComponent<?>> T GetOrCreateComponent(Class<T> clazz) {
         var component = GetComponent(clazz);
         if (component != null) return component;
