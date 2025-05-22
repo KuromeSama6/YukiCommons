@@ -46,7 +46,7 @@ public class BukkitPlayerScoreboard implements IScoreboard, IDestroyable {
         if (visible && board == null) {
             board = new FastBoard(player.getPlayer());
         } else if (!visible && board != null) {
-            board.delete();
+            if (!board.isDeleted()) board.delete();
             board = null;
         }
 
@@ -58,7 +58,7 @@ public class BukkitPlayerScoreboard implements IScoreboard, IDestroyable {
 
     @Override
     public void Destroy() {
-        if (board != null) board.delete();
+        if (board != null && !board.isDeleted()) board.delete();
         providers.clear();
         scheduler.Free();
     }

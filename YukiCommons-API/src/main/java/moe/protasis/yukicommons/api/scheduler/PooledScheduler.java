@@ -5,6 +5,7 @@ import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class PooledScheduler {
     private final IAbstractScheduler scheduler;
@@ -31,6 +32,20 @@ public class PooledScheduler {
 
     public void JoinMain(Runnable func) {
        scheduler.ScheduleSyncDelayedTask(func, 0);
+    }
+
+    public void JoinMainBlocking(Runnable func) {
+        var future = new CompletableFuture<Void>();
+        scheduler.ScheduleSyncDelayedTask(() -> {
+            func.run();
+            future.complete(null);
+        }, 0);
+
+        try {
+            future.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void Free() {

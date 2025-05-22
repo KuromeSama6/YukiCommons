@@ -15,6 +15,7 @@ public interface IVersionAdaptor {
     String SerializeItem(ItemStack itemStack);
     ItemStack DeserializeItem(String item);
     ItemStack AddTag(ItemStack item, String key);
+    boolean HasTag(ItemStack item, String key);
     ItemStack SetUnbreakable(ItemStack item, boolean unbreakable);
 
     static IVersionAdaptor Get() {

@@ -48,6 +48,9 @@ public class Vec2 implements IJsonSerializable {
     public double Lerp(double t) {
         return MathUtil.Lerp(x, y, t);
     }
+    public double Interval() {
+        return Math.abs(x - y);
+    }
 
     public List<Double> ToList() {
         return List.of(x, y);

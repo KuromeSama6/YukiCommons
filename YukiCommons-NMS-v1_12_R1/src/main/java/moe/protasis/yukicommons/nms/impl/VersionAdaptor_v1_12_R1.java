@@ -53,6 +53,23 @@ public class VersionAdaptor_v1_12_R1 implements IVersionAdaptor {
 
     @Override
     public ItemStack AddTag(ItemStack item, String key) {
-        return null;
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+        }
+        tag.setString(key, "true");
+        nmsItem.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
+    public boolean HasTag(ItemStack item, String key) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            return false;
+        }
+        return tag.hasKey(key);
     }
 }

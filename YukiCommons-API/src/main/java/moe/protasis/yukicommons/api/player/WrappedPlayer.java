@@ -51,7 +51,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * @see PlayerComponent
      */
     @Getter
-    protected final Map<Class<?>, PlayerComponent<?>> components = new HashMap<>();
+    protected final Map<Class<?>, PlayerComponent<?>> components = new ConcurrentHashMap<>();
 
     private boolean dataLoadBegun;
 

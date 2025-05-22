@@ -51,6 +51,7 @@ public class ItemBuilder {
         }
         List<String> current = meta.getLore();
         if (current == null) current = new ArrayList<>();
+        current.clear();
         current.addAll(Arrays.stream(lores).map(c -> ChatColor.translateAlternateColorCodes('&', c)).collect(Collectors.toList()));
         meta.setLore(current);
         item.setItemMeta(meta);
