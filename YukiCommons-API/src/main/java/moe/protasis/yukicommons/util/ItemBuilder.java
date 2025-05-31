@@ -1,13 +1,11 @@
 package moe.protasis.yukicommons.util;
 
 import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
@@ -72,6 +70,22 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder SetGlint(boolean glint) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+        }
+        if (glint) {
+            meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+            meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+        } else {
+            meta.removeEnchant(Enchantment.ARROW_INFINITE);
+            meta.removeItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+        }
+        item.setItemMeta(meta);
+        return this;
+    }
+
     public ItemBuilder SetBlockColor(DyeColor color) {
         item.setDurability(color.getWoolData());
         return this;
@@ -79,6 +93,14 @@ public class ItemBuilder {
 
     public ItemBuilder SetDyeColor(DyeColor color) {
         item.setDurability(color.getDyeData());
+        return this;
+    }
+
+    public ItemBuilder SetArmorColor(Color color) {
+        if (!(item.getItemMeta() instanceof LeatherArmorMeta)) return this;
+        var meta = (LeatherArmorMeta)item.getItemMeta();
+        meta.setColor(color);
+        item.setItemMeta(meta);
         return this;
     }
 
