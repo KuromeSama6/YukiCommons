@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -218,11 +219,12 @@ public class JsonWrapper {
 
     public void Save(File file) {
         file.getParentFile().mkdirs();
-        try (FileWriter writer = new FileWriter(file)){
-            GetBuilder()
-                    .setPrettyPrinting()
-                    .create()
-                    .toJson(json, writer);
+        var str = GetBuilder()
+                .setPrettyPrinting()
+                .create()
+                .toJson(json);
+        try {
+            Files.writeString(file.toPath(), str);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
