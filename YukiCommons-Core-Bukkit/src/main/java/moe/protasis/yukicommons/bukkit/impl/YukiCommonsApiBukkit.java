@@ -23,6 +23,7 @@ public class YukiCommonsApiBukkit implements IYukiCommonsAPI {
     private static final Collection<IJsonTypeAdapter> jsonTypeAdapters = List.of(
             new DateTimeSerializer(),
             new JsonWrapperSerializer(),
+            new UUIDSerializer(),
             new ItemStackSerializer(),
             new LocationSerializer(),
             new PotionEffectSerializer()

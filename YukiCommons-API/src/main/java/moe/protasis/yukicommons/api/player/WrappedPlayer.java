@@ -249,6 +249,9 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     }
 
     public final synchronized void SaveAll() throws Exception {
+        if (dataPristine) {
+            return; // No need to save if data is pristine
+        }
         var components = GetDataComponents();
         components.sort(Comparator.comparingDouble(c -> -c.GetNiceness()));
 

@@ -66,16 +66,18 @@ public class VelocityBrigadierCommandHandler implements RawCommand {
     public List<String> suggest(Invocation invocation) {
         var executor = YukiCommonsVelocity.getInstance().getAdaptor().AdaptToCommandExecutor(invocation.source());
         var args = invocation.arguments();
-        String str = invocation.alias();
-        if (!args.isEmpty()) {
-            str += " " + args;
-        }
+        String str = cmd.GetName() + " " + args;
+
+//        System.out.println("alias=[%s] args=[%s] str=[%s]".formatted(invocation.alias(), invocation.arguments(), str));
+
         var parseResult = dispatcher.parse(str, executor);
 
+//        System.out.println(str);
         try {
-            return dispatcher.getCompletionSuggestions(parseResult).get().getList().stream()
-                    .map(Suggestion::getText)
-                    .toList();
+            var suggestions = dispatcher.getCompletionSuggestions(parseResult).get();
+            return suggestions.getList().stream()
+                .map(Suggestion::getText)
+                .toList();
 
         } catch (Exception e) {
             throw new RuntimeException(e);

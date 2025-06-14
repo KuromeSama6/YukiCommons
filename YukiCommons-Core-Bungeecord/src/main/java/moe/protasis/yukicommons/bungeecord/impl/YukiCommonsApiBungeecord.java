@@ -10,6 +10,7 @@ import moe.protasis.yukicommons.impl.json.serializer.DateTimeSerializer;
 import moe.protasis.yukicommons.impl.json.serializer.JsonWrapperSerializer;
 import moe.protasis.yukicommons.bungeecord.impl.player.BungeecordAutoPlayerLoadData;
 import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
+import moe.protasis.yukicommons.impl.json.serializer.UUIDSerializer;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import net.md_5.bungee.api.ProxyServer;
 
@@ -19,14 +20,16 @@ import java.util.logging.Logger;
 
 public class YukiCommonsApiBungeecord implements IYukiCommonsAPI {
     private static final Collection<IJsonTypeAdapter> jsonTypeAdapters = List.of(
-            new DateTimeSerializer(),
-            new JsonWrapperSerializer()
+        new DateTimeSerializer(),
+        new JsonWrapperSerializer(),
+        new UUIDSerializer()
     );
 
     @Override
     public EnvironmentType GetEnvironment() {
         return EnvironmentType.BUNGEECORD;
     }
+
     @Override
     public void AddAutoPlayerRegister(Class<? extends WrappedPlayer> clazz, IAbstractPlugin plugin) {
         YukiCommonsBungee.getInstance().getAutoPlayerLoadData().add(new BungeecordAutoPlayerLoadData(clazz, plugin));

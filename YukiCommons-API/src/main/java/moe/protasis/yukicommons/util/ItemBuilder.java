@@ -32,6 +32,11 @@ public class ItemBuilder {
         this.item = item.clone();
     }
 
+    public ItemBuilder SetAmount(int amount) {
+        item.setAmount(amount);
+        return this;
+    }
+
     public ItemBuilder SetDisplay(String str) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
