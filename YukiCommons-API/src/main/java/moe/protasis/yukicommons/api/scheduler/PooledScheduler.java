@@ -51,6 +51,7 @@ public class PooledScheduler {
 
     public void Free() {
         for (int handle : handles) scheduler.CancelTask(handle);
+        handles.clear();
     }
 
     public void Cancel(int handle) {

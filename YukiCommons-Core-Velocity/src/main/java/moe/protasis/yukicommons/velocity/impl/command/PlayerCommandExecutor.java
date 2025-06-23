@@ -2,6 +2,7 @@ package moe.protasis.yukicommons.velocity.impl.command;
 
 import com.velocitypowered.api.proxy.Player;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import moe.protasis.yukicommons.velocity.impl.YukiCommonsVelocity;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;

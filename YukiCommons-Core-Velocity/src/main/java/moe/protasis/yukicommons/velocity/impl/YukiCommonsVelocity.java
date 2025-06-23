@@ -77,6 +77,12 @@ public class YukiCommonsVelocity implements IYukiCommons {
         return EventTask.async(() -> {
             for (AutoPlayerLoadData data : autoPlayerLoadData) {
                 Class<? extends WrappedPlayer> clazz = data.getPlayerClass();
+                var current = WrappedPlayer.getPlayers().get(clazz);
+                if (current != null && current.containsKey(e.getPlayer().getUniqueId())) {
+                    logger.warning("Skipping player object creation of %s for player %s - player is already connected.".formatted(clazz, e.getPlayer().getUsername()));
+                    return;
+                }
+
                 try {
                     WrappedPlayer player = clazz
                             .getDeclaredConstructor(IAbstractPlayer.class)
@@ -122,6 +128,7 @@ public class YukiCommonsVelocity implements IYukiCommons {
 
     @Subscribe
     public void OnPlayerQuit(DisconnectEvent e) {
+        if (e.getLoginStatus() == DisconnectEvent.LoginStatus.CONFLICTING_LOGIN) return;
         DestroyPlayer(e.getPlayer());
     }
 

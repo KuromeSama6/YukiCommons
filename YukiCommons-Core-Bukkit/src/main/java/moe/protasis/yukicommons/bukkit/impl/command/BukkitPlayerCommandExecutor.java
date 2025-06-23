@@ -1,11 +1,13 @@
 package moe.protasis.yukicommons.bukkit.impl.command;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import moe.protasis.yukicommons.api.command.IAbstractCommandExecutor;
 import moe.protasis.yukicommons.api.player.IAbstractPlayer;
 
 @AllArgsConstructor
 public class BukkitPlayerCommandExecutor implements IAbstractCommandExecutor {
+    @Getter
     private final IAbstractPlayer player;
 
     @Override
