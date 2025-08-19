@@ -37,6 +37,10 @@ public class JsonWrapper {
         this(GetBuilder().create().fromJson(str, JsonObject.class));
     }
 
+    public boolean IsEmpty() {
+        return json == null || json.entrySet().isEmpty();
+    }
+
     public String GetString(String path, String def) {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isString() ? ret.getAsString() : def;

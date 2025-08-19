@@ -32,7 +32,13 @@ public class BungeecordBrigadierCommandHandler extends Command implements TabExe
     @Override
     public void execute(CommandSender commandSender, String[] strings) {
         var executor = YukiCommonsBungee.getInstance().getAdaptor().AdaptToCommandExecutor(commandSender);
-        var str = String.join(" ", strings);
+
+        String str;
+        if (strings.length == 0) {
+            str = cmd.GetName();
+        } else {
+            str = "%s %s".formatted(cmd.GetName(), String.join(" ", strings));
+        }
 
         try {
             dispatcher.execute(str, executor);

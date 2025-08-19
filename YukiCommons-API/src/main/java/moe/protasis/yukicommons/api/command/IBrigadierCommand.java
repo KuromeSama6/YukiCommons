@@ -10,7 +10,9 @@ public interface IBrigadierCommand {
     void Build(LiteralArgumentBuilder<IAbstractCommandExecutor> builder);
     String GetName();
     String[] GetAliases();
-    String GetPermission();
+    default String GetPermission() {
+        return null;
+    }
 
     default void EnsurePlayer(CommandContext<IAbstractCommandExecutor> ctx) {
         if (!ctx.getSource().IsPlayer())

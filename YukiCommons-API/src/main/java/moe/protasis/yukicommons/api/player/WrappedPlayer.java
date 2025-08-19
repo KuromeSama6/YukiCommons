@@ -312,6 +312,14 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
                 .collect(Collectors.toList());
     }
 
+    public static List<? extends WrappedPlayer> GetAllPlayerObjects(UUID uuid) {
+        return players.values().stream()
+                .filter(map -> map.containsKey(uuid))
+                .map(map -> map.get(uuid))
+                .collect(Collectors.toList());
+    }
+
+
     public static void DestroyAll(UUID uuid) {
         for (Map<UUID, WrappedPlayer> map : players.values()) {
             if (map.containsKey(uuid)) {
