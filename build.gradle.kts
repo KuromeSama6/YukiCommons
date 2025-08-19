@@ -22,6 +22,8 @@ tasks.named("build") {
 allprojects {
     repositories {
         mavenCentral()
+        maven("https://repo.codemc.io/repository/maven-releases/")
+        maven("https://repo.codemc.io/repository/maven-snapshots/")
     }
 
     tasks.withType<JavaCompile> {

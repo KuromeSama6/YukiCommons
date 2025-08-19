@@ -24,7 +24,7 @@ dependencies {
     compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
     compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
     compileOnly("com.github.retrooper:packetevents-bungeecord:2.7.0")
-    compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.1-SNAPSHOT")
 
     implementation("joda-time:joda-time:2.12.5")
     implementation("org.jooq:jooq:3.14.15")
@@ -38,7 +38,7 @@ dependencies {
     compileOnly("moe.protasis:yukicommons-api:1.2.0")
 
     // Optional: avoid downloading javadoc classifier as a real dependency
-    compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT") {
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.1-SNAPSHOT") {
         artifact {
             classifier = "javadoc"
             type = "jar"
