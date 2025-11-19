@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     compileOnly("com.github.retrooper:packetevents-bungeecord:2.7.0")
-    compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.1-SNAPSHOT")
 
     implementation("joda-time:joda-time:2.12.5")
     implementation("org.jooq:jooq:3.14.15")
