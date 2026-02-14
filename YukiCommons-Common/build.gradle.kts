@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     implementation(project(":yukicommons-api"))
-    compileOnly("com.google.code.gson:gson:2.13.0")
+    implementation("com.google.code.gson:gson:2.8.0")
     implementation("joda-time:joda-time:2.12.5")
     implementation("io.github.classgraph:classgraph:4.8.174")
     implementation("org.projectlombok:lombok:1.18.30")

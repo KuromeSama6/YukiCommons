@@ -34,6 +34,7 @@ dependencies {
     implementation("org.apache.ant:ant:1.10.15")
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("com.mojang:brigadier:1.0.18")
+    implementation("com.google.code.gson:gson:2.8.0")
 
     compileOnly("moe.protasis:yukicommons-api:1.2.0")
 

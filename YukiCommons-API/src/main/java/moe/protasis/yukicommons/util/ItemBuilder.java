@@ -61,6 +61,19 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder AppendLore(String... lores) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+        }
+        List<String> current = meta.getLore();
+        if (current == null) current = new ArrayList<>();
+        current.addAll(Arrays.stream(lores).map(c -> ChatColor.translateAlternateColorCodes('&', c)).collect(Collectors.toList()));
+        meta.setLore(current);
+        item.setItemMeta(meta);
+        return this;
+    }
+
 
     public ItemBuilder SetDurability(int durability) {
         item.setDurability((short)durability);

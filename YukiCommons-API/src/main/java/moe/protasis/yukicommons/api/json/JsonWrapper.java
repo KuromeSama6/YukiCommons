@@ -287,7 +287,7 @@ public class JsonWrapper {
     }
 
     public JsonWrapper Clone() {
-        return new JsonWrapper(json.deepCopy());
+        return new JsonWrapper(json.toString());
     }
 
     @Override
