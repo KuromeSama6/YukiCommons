@@ -12,6 +12,7 @@ import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
 import moe.protasis.yukicommons.impl.json.serializer.DateTimeSerializer;
 import moe.protasis.yukicommons.impl.json.serializer.JsonWrapperSerializer;
+import moe.protasis.yukicommons.impl.json.serializer.SimpleLocationSerializer;
 import moe.protasis.yukicommons.impl.json.serializer.UUIDSerializer;
 import moe.protasis.yukicommons.velocity.impl.player.VelocityAutoPlayerLoadData;
 import moe.protasis.yukicommons.util.EnvironmentType;
@@ -52,7 +53,8 @@ public class YukiCommonsApiVelocity implements IYukiCommonsAPI {
         return List.of(
             new DateTimeSerializer(),
             new JsonWrapperSerializer(),
-            new UUIDSerializer()
+            new UUIDSerializer(),
+            new SimpleLocationSerializer()
         );
     }
 
