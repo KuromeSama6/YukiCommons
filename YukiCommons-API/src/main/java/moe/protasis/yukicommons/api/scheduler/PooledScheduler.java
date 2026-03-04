@@ -2,6 +2,7 @@ package moe.protasis.yukicommons.api.scheduler;
 
 import lombok.Getter;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
+import moe.protasis.yukicommons.util.promise.AsyncPromise;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,5 +90,23 @@ public class PooledScheduler {
             }
         });
         return ret;
+    }
+
+    public <T> AsyncPromise<T> RunAsyncPromise(Supplier<T> func) {
+        var ret = new CompletableFuture<T>();
+        scheduler.RunAsync(() -> {
+            try {
+                var value = func.get();
+                ret.complete(value);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                ret.completeExceptionally(e);
+            }
+        });
+        return new AsyncPromise<>(this, ret);
+    }
+
+    public <T> AsyncPromise<T> MakePromise(CompletableFuture<T> future) {
+        return new AsyncPromise<>(this, future);
     }
 }

@@ -1,0 +1,46 @@
+package moe.protasis.yukicommons.util.promise;
+
+import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+public class AsyncPromise<T> {
+    private final CompletableFuture<T> future;
+    private final PooledScheduler scheduler;
+
+    public AsyncPromise(PooledScheduler scheduler, CompletableFuture<T> future) {
+        this.scheduler = scheduler;
+        this.future = future;
+    }
+
+    public AsyncPromise<T> Then(Consumer<T> consumer) {
+        future.thenAcceptAsync(consumer);
+        return this;
+    }
+
+    public AsyncPromise<T> ThenOnMainThread(Consumer<T> consumer) {
+        future.thenAcceptAsync(c -> scheduler.JoinMain(() -> {
+            consumer.accept(c);
+        }));
+        return this;
+    }
+
+    public AsyncPromise<T> Err(Consumer<Throwable> consumer) {
+        future.exceptionally(e -> {
+            consumer.accept(e);
+            return null;
+        });
+        return this;
+    }
+
+    public AsyncPromise<T> ErrSync(Consumer<Throwable> consumer) {
+        future.exceptionally(e -> {
+            scheduler.JoinMain(() -> {
+                consumer.accept(e);
+            });
+            return null;
+        });
+        return this;
+    }
+}
