@@ -3,6 +3,7 @@ package moe.protasis.yukicommons.util.promise;
 import moe.protasis.yukicommons.api.scheduler.PooledScheduler;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 public class AsyncPromise<T> {
@@ -56,5 +57,9 @@ public class AsyncPromise<T> {
             scheduler.JoinMain(runnable);
         });
         return this;
+    }
+
+    public T Join() throws ExecutionException, InterruptedException {
+        return future.get();
     }
 }
