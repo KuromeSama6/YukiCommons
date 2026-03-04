@@ -43,4 +43,18 @@ public class AsyncPromise<T> {
         });
         return this;
     }
+
+    public AsyncPromise<T> Finally(Runnable runnable) {
+        future.whenComplete((res, ex) -> {
+            scheduler.JoinMain(runnable);
+        });
+        return this;
+    }
+
+    public AsyncPromise<T> FinallySync(Runnable runnable) {
+        future.whenComplete((res, ex) -> {
+            scheduler.JoinMain(runnable);
+        });
+        return this;
+    }
 }
