@@ -35,7 +35,7 @@ public class AsyncPromise<T> {
         return this;
     }
 
-    public AsyncPromise<T> ErrSync(Consumer<Throwable> consumer) {
+    public AsyncPromise<T> ErrOnMainThread(Consumer<Throwable> consumer) {
         future.exceptionally(e -> {
             scheduler.JoinMain(() -> {
                 consumer.accept(e);
@@ -46,6 +46,11 @@ public class AsyncPromise<T> {
     }
 
     public AsyncPromise<T> Finally(Runnable runnable) {
+        future.whenComplete((res, ex) -> runnable.run());
+        return this;
+    }
+
+    public AsyncPromise<T> FinallyOnMainThread(Runnable runnable) {
         future.whenComplete((res, ex) -> {
             scheduler.JoinMain(runnable);
         });

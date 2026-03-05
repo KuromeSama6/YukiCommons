@@ -11,6 +11,7 @@ import moe.protasis.yukicommons.util.YukiCommonsApi;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +55,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
     protected final Map<Class<?>, PlayerComponent<?>> components = new ConcurrentHashMap<>();
 
     private boolean dataLoadBegun;
+    private final AtomicBoolean isReady = new AtomicBoolean(false);
 
     /**
      * Creates a new WrappedPlayer object.
@@ -211,6 +213,7 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
      * On BungeeCord, this is called after the <code>PostLoginEvent</code> is fired and <code>FinalizeConnection</code> is called on the wrapped player.
      */
     public void OnJoin() {
+        isReady.set(true);
         components.values().forEach(PlayerComponent::OnReady);
     }
 
@@ -273,6 +276,10 @@ public abstract class WrappedPlayer implements IWrappedPlayer {
 
     public <T extends WrappedPlayer> T GetPlayer(Class<T> clazz) {
         return GetPlayer(uuid, clazz);
+    }
+
+    public boolean IsReady() {
+        return isReady.get();
     }
 
     public static <T extends IWrappedPlayer> T GetPlayer(UUID uuid, Class<T> clazz) {
