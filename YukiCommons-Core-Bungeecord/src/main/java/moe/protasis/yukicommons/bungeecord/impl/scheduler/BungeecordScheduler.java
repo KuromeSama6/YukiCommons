@@ -13,12 +13,12 @@ public class BungeecordScheduler implements IAbstractScheduler {
 
     @Override
     public int ScheduleSyncDelayedTask(Runnable func, long delay) {
-        return ProxyServer.getInstance().getScheduler().schedule(pl, func, delay, TimeUnit.SECONDS).getId();
+        return ProxyServer.getInstance().getScheduler().schedule(pl, func, delay, TimeUnit.MILLISECONDS).getId();
     }
 
     @Override
     public int ScheduleSyncRepeatingTask(Runnable func, long delay, long interval) {
-        return ProxyServer.getInstance().getScheduler().schedule(pl, func, delay, interval, TimeUnit.SECONDS).getId();
+        return ProxyServer.getInstance().getScheduler().schedule(pl, func, delay, interval, TimeUnit.MILLISECONDS).getId();
     }
 
     @Override
@@ -34,5 +34,10 @@ public class BungeecordScheduler implements IAbstractScheduler {
     @Override
     public void CallOnMainThread(Runnable func) {
         ProxyServer.getInstance().getScheduler().schedule(pl, func, 0, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public int ScheduleAsyncRepeatingTask(Runnable func, long delay, long interval) {
+        return ProxyServer.getInstance().getScheduler().schedule(pl, func, delay, interval, TimeUnit.MILLISECONDS).getId();
     }
 }

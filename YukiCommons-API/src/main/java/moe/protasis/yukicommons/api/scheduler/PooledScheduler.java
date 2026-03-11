@@ -32,6 +32,12 @@ public class PooledScheduler {
         return handle;
     }
 
+    public int AddRepeatingAsync(Runnable func, long delay, long interval) {
+        int handle = scheduler.ScheduleAsyncRepeatingTask(func, delay, interval);
+        handles.add(handle);
+        return handle;
+    }
+
     public void JoinMain(Runnable func) {
        scheduler.ScheduleSyncDelayedTask(func, 0);
     }

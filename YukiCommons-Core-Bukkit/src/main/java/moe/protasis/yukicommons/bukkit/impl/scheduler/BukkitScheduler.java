@@ -22,6 +22,11 @@ public class BukkitScheduler implements IAbstractScheduler {
     }
 
     @Override
+    public int ScheduleAsyncRepeatingTask(Runnable func, long delay, long interval) {
+        return Bukkit.getScheduler().runTaskTimerAsynchronously(pl, func, delay, interval).getTaskId();
+    }
+
+    @Override
     public void CancelTask(int handle) {
         Bukkit.getScheduler().cancelTask(handle);
     }

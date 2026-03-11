@@ -16,33 +16,7 @@ public class SimpleLocationSerializer implements IJsonTypeAdapter, JsonSerialize
         // new serialization format
         if (jsonElement instanceof JsonPrimitive primitive && primitive.isString()) {
             var str = primitive.getAsString();
-            boolean useEntityOffset = str.endsWith("/e");
-            if (useEntityOffset) {
-                str = str.substring(0, str.length() - 2);
-            }
-
-
-            var args = str.split(",");
-            if (args.length < 3)
-                throw new JsonParseException("At least 3 arguments are required to deserialize a Location: " + jsonElement);
-
-            try {
-                var x = Double.parseDouble(args[0]);
-                var y = Double.parseDouble(args[1]);
-                var z = Double.parseDouble(args[2]);
-                var pitch = args.length > 3 ? Float.parseFloat(args[3]) : 0f;
-                var yaw = args.length > 4 ? Float.parseFloat(args[4]) : 0f;
-
-                if (useEntityOffset) {
-                    x += 0.5;
-                    z += 0.5;
-                }
-
-                return new SimpleLocation(x, y, z, yaw, pitch);
-
-            } catch (NumberFormatException e) {
-                throw new JsonParseException("Failed to parse Location coordinates: " + jsonElement, e);
-            }
+            return new SimpleLocation(str);
         }
 
         throw new JsonParseException("Unsupported Location serialization format: " + jsonElement);

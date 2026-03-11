@@ -1,5 +1,6 @@
 package moe.protasis.yukicommons.util;
 
+import com.google.gson.JsonParseException;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,6 +27,39 @@ public class SimpleLocation implements IJsonSerializable {
         this.z = data.GetDouble("z");
         this.yaw = data.GetDouble("yaw");
         this.pitch = data.GetDouble("pitch");
+    }
+
+    public SimpleLocation(String str) {
+        boolean useEntityOffset = str.endsWith("/e");
+        if (useEntityOffset) {
+            str = str.substring(0, str.length() - 2);
+        }
+
+        var args = str.split(",");
+        if (args.length < 3)
+            throw new JsonParseException("At least 3 arguments are required to deserialize a Location: " + str);
+
+        try {
+            var x = Double.parseDouble(args[0]);
+            var y = Double.parseDouble(args[1]);
+            var z = Double.parseDouble(args[2]);
+            var pitch = args.length > 3 ? Float.parseFloat(args[3]) : 0f;
+            var yaw = args.length > 4 ? Float.parseFloat(args[4]) : 0f;
+
+            if (useEntityOffset) {
+                x += 0.5;
+                z += 0.5;
+            }
+
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.yaw = yaw;
+            this.pitch = pitch;
+
+        } catch (NumberFormatException e) {
+            throw new JsonParseException("Failed to parse Location coordinates: " + str, e);
+        }
     }
 
     public SimpleLocation WithRotation(double yaw, double pitch) {

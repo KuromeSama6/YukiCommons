@@ -22,9 +22,9 @@ public class VelocityScheduler implements IAbstractScheduler {
     @Override
     public int ScheduleSyncDelayedTask(Runnable func, long delay) {
         var task = YukiCommonsVelocity.getInstance().getServer().getScheduler()
-                .buildTask(plugin, func)
-                .delay(delay, TimeUnit.MILLISECONDS)
-                .schedule();
+            .buildTask(plugin, func)
+            .delay(delay, TimeUnit.MILLISECONDS)
+            .schedule();
         int handle = handleCounter++;
         handles.put(handle, task);
         return handle;
@@ -33,10 +33,10 @@ public class VelocityScheduler implements IAbstractScheduler {
     @Override
     public int ScheduleSyncRepeatingTask(Runnable func, long delay, long interval) {
         var task = YukiCommonsVelocity.getInstance().getServer().getScheduler()
-                .buildTask(plugin, func)
-                .delay(delay, TimeUnit.MILLISECONDS)
-                .repeat(interval, TimeUnit.MILLISECONDS)
-                .schedule();
+            .buildTask(plugin, func)
+            .delay(delay, TimeUnit.MILLISECONDS)
+            .repeat(interval, TimeUnit.MILLISECONDS)
+            .schedule();
         int handle = handleCounter++;
         handles.put(handle, task);
         return handle;
@@ -63,7 +63,13 @@ public class VelocityScheduler implements IAbstractScheduler {
     @Override
     public void CallOnMainThread(Runnable func) {
         YukiCommonsVelocity.getInstance().getServer().getScheduler()
-                .buildTask(plugin, func)
-                .schedule();
+            .buildTask(plugin, func)
+            .schedule();
+    }
+
+    @Override
+    public int ScheduleAsyncRepeatingTask(Runnable func, long delay, long interval) {
+        // Velocity does not have a separate async scheduler, so we just run it on the main thread.
+        return ScheduleSyncRepeatingTask(func, delay, interval);
     }
 }

@@ -17,6 +17,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BungeecordBrigadierCommandHandler extends Command implements TabExecutor {
@@ -73,8 +74,11 @@ public class BungeecordBrigadierCommandHandler extends Command implements TabExe
     @Override
     public Iterable<String> onTabComplete(CommandSender commandSender, String[] strings) {
         var executor = YukiCommonsBungee.getInstance().getAdaptor().AdaptToCommandExecutor(commandSender);
-        var str = String.join(" ", strings);
-        var parseResult = dispatcher.parse(str, executor);
+
+        var li = new ArrayList<>(Arrays.asList(strings));
+        li.remove(0);
+
+        var parseResult = dispatcher.parse(String.join(" ", li), executor);
 
         try {
             return dispatcher.getCompletionSuggestions(parseResult).get().getList().stream()

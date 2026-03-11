@@ -6,4 +6,5 @@ public interface IAbstractScheduler {
     void CancelTask(int handle);
     void RunAsync(Runnable func);
     void CallOnMainThread(Runnable func);
+    int ScheduleAsyncRepeatingTask(Runnable func, long delay, long interval);
 }
