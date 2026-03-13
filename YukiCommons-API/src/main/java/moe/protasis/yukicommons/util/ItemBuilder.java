@@ -3,6 +3,7 @@ package moe.protasis.yukicommons.util;
 import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -154,6 +155,16 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder AddTag(String key, String value) {
+        item = IVersionAdaptor.Get().AddTag(item, key, value);
+        return this;
+    }
+
+    public ItemBuilder AddTag(String key, int value) {
+        item = IVersionAdaptor.Get().AddTag(item, key, value);
+        return this;
+    }
+
     public ItemBuilder AddPotionEffects(PotionEffect... effects) {
         PotionMeta meta = (PotionMeta)item.getItemMeta();
 
@@ -167,6 +178,18 @@ public class ItemBuilder {
 
     public ItemStack Build() {
         return item.clone();
+    }
+
+    public void Give(Inventory inventory, int slot) {
+        inventory.setItem(slot, item);
+    }
+
+    public void Give(Inventory inventory) {
+        inventory.addItem(item);
+    }
+
+    public void Give(IItemReceiver receiver) {
+        receiver.Receive(item);
     }
 
     public static ItemBuilder Unbreakable(Material material) {

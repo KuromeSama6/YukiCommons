@@ -64,6 +64,30 @@ public class VersionAdaptor_v1_12_R1 implements IVersionAdaptor {
     }
 
     @Override
+    public ItemStack AddTag(ItemStack item, String key, String value) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+        }
+        tag.setString(key, value);
+        nmsItem.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
+    public ItemStack AddTag(ItemStack item, String key, int value) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+        }
+        tag.setInt(key, value);
+        nmsItem.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
     public boolean HasTag(ItemStack item, String key) {
         var nmsItem = CraftItemStack.asNMSCopy(item);
         var tag = nmsItem.getTag();
@@ -71,5 +95,37 @@ public class VersionAdaptor_v1_12_R1 implements IVersionAdaptor {
             return false;
         }
         return tag.hasKey(key);
+    }
+
+    @Override
+    public String GetStringTag(ItemStack item, String key) {
+        return GetStringTag(item, key, null);
+    }
+
+    @Override
+    public String GetStringTag(ItemStack item, String key, String defaultValue) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            return defaultValue;
+        }
+
+        return tag.getString(key);
+    }
+
+    @Override
+    public int GetIntTag(ItemStack item, String key) {
+        return GetIntTag(item, key, 0);
+    }
+
+    @Override
+    public int GetIntTag(ItemStack item, String key, int defaultValue) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            return defaultValue;
+        }
+
+        return tag.getInt(key);
     }
 }
