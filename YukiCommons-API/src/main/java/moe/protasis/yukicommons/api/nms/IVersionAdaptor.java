@@ -17,8 +17,10 @@ public interface IVersionAdaptor {
     ItemStack AddTag(ItemStack item, String key);
     ItemStack AddTag(ItemStack item, String key, String value);
     ItemStack AddTag(ItemStack item, String key, int value);
+    ItemStack RemoveTag(ItemStack item, String key);
 
     boolean HasTag(ItemStack item, String key);
+
     String GetStringTag(ItemStack item, String key);
     String GetStringTag(ItemStack item, String key, String defaultValue);
     int GetIntTag(ItemStack item, String key);
