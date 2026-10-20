@@ -33,6 +33,7 @@ public class JsonWrapper {
     public JsonWrapper() {
         this(new JsonObject());
     }
+
     public JsonWrapper(String str) {
         this(GetBuilder().create().fromJson(str, JsonObject.class));
     }
@@ -45,6 +46,7 @@ public class JsonWrapper {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isString() ? ret.getAsString() : def;
     }
+
     public String GetString(String path) {
         return GetString(path, null);
     }
@@ -60,6 +62,7 @@ public class JsonWrapper {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isNumber() ? ret.getAsInt() : def;
     }
+
     public int GetInt(String path) {
         return GetInt(path, 0);
     }
@@ -68,6 +71,7 @@ public class JsonWrapper {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isNumber() ? ret.getAsLong() : def;
     }
+
     public long GetLong(String path) {
         return GetLong(path, 0);
     }
@@ -76,6 +80,7 @@ public class JsonWrapper {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isNumber() ? ret.getAsDouble() : def;
     }
+
     public double GetDouble(String path) {
         return GetDouble(path, 0);
     }
@@ -84,9 +89,11 @@ public class JsonWrapper {
         JsonElement ret = ResolvePath(path);
         return ret != null && ret.isJsonPrimitive() && ret.getAsJsonPrimitive().isBoolean() ? ret.getAsBoolean() : def;
     }
+
     public boolean GetBool(String path) {
         return GetBool(path, false);
     }
+
     public UUID GetUuid(String path) {
         String ret = GetString(path);
         return ret == null ? null : UUID.fromString(ret);
@@ -162,9 +169,10 @@ public class JsonWrapper {
 
     public List<String> GetKeys() {
         return json.entrySet().stream()
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
     }
+
     public boolean Has(String path) {
         return ResolvePath(path) != null;
     }
@@ -224,9 +232,9 @@ public class JsonWrapper {
     public void Save(File file) {
         file.getParentFile().mkdirs();
         var str = GetBuilder()
-                .setPrettyPrinting()
-                .create()
-                .toJson(json);
+            .setPrettyPrinting()
+            .create()
+            .toJson(json);
         try {
             Files.writeString(file.toPath(), str);
         } catch (IOException e) {
@@ -237,8 +245,7 @@ public class JsonWrapper {
     private void Set(String name, JsonObject parent, Object obj) {
         if (obj == null || obj instanceof JsonNull) {
             parent.remove(name);
-        }
-        else if (obj instanceof Number) parent.addProperty(name, (Number)obj);
+        } else if (obj instanceof Number) parent.addProperty(name, (Number)obj);
         else if (obj instanceof Boolean) parent.addProperty(name, (Boolean)obj);
         else if (obj instanceof Character) parent.addProperty(name, (Character)obj);
         else if (obj instanceof JsonElement) {
@@ -263,8 +270,7 @@ public class JsonWrapper {
             parent.add(name, gson.toJsonTree(obj, Location.class));
         } else if (obj instanceof Enum<?>) {
             parent.addProperty(name, obj.toString());
-        }
-        else if (obj instanceof JsonWrapper) parent.add(name, ((JsonWrapper)obj).json);
+        } else if (obj instanceof JsonWrapper) parent.add(name, ((JsonWrapper)obj).json);
         else parent.addProperty(name, obj.toString());
     }
 
@@ -297,7 +303,8 @@ public class JsonWrapper {
 
     public static GsonBuilder GetBuilder() {
         var builder = new GsonBuilder()
-                .disableHtmlEscaping();
+            .serializeNulls()
+            .disableHtmlEscaping();
         var api = YukiCommonsApi.Get();
         for (var adapter : api.GetJsonTypeAdapters()) {
             builder.registerTypeAdapter(adapter.GetTargetType(), adapter);
@@ -318,12 +325,10 @@ public class JsonWrapper {
             if (sec.isConfigurationSection(key)) {
 //                System.out.println("config section");
                 ret.Set(key, FromYaml(sec.getConfigurationSection(key)));
-            }
-            else if (sec.isList(key)){
+            } else if (sec.isList(key)) {
 //                System.out.println("list");
                 ret.Set(key, sec.getList(key));
-            }
-            else {
+            } else {
 //                System.out.println(String.format("primitive %s", sec.get(key).getClass()));
                 ret.Set(key, sec.get(key));
             }

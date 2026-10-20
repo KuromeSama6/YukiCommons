@@ -5,3 +5,5 @@ author: KuromeSama6
 
 softdepend:
     - packetevents
+
+load: STARTUP

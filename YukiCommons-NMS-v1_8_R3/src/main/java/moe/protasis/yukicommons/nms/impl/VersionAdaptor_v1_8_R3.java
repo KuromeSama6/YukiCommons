@@ -96,6 +96,18 @@ public class VersionAdaptor_v1_8_R3 implements IVersionAdaptor {
     }
 
     @Override
+    public ItemStack AddTag(ItemStack item, String key, long value) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+        }
+        tag.setLong(key, value);
+        nmsItem.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
     public ItemStack RemoveTag(ItemStack item, String key) {
         var nmsItem = CraftItemStack.asNMSCopy(item);
         var tag = nmsItem.getTag();
@@ -145,5 +157,20 @@ public class VersionAdaptor_v1_8_R3 implements IVersionAdaptor {
             return defaultValue;
         }
         return tag.getInt(key);
+    }
+
+    @Override
+    public long GetLongTag(ItemStack item, String key) {
+        return GetLongTag(item, key, 0L);
+    }
+
+    @Override
+    public long GetLongTag(ItemStack item, String key, long defaultValue) {
+        var nmsItem = CraftItemStack.asNMSCopy(item);
+        var tag = nmsItem.getTag();
+        if (tag == null) {
+            return defaultValue;
+        }
+        return tag.getLong(key);
     }
 }

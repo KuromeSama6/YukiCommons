@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ItemBuilder {
+    private final IVersionAdaptor versionAdaptor = IVersionAdaptor.Get();
     protected ItemStack item;
 
     public ItemBuilder(Material material) {
@@ -82,7 +84,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder SetUnbreakable(boolean unbreakable) {
-        var version = IVersionAdaptor.Get();
+        var version = versionAdaptor;
         if (version == null) return this;
 
         item = version.SetUnbreakable(item, unbreakable);
@@ -140,6 +142,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder ApplyCustom(Function<ItemStack, ItemStack> func) {
+        item = func.apply(item);
+        return this;
+    }
+
     public ItemBuilder SetItem(ItemStack item) {
         this.item = item;
         return this;
@@ -151,17 +158,22 @@ public class ItemBuilder {
     }
 
     public ItemBuilder AddTag(String key) {
-        item = IVersionAdaptor.Get().AddTag(item, key);
+        item = versionAdaptor.AddTag(item, key);
         return this;
     }
 
     public ItemBuilder AddTag(String key, String value) {
-        item = IVersionAdaptor.Get().AddTag(item, key, value);
+        item = versionAdaptor.AddTag(item, key, value);
         return this;
     }
 
     public ItemBuilder AddTag(String key, int value) {
-        item = IVersionAdaptor.Get().AddTag(item, key, value);
+        item = versionAdaptor.AddTag(item, key, value);
+        return this;
+    }
+
+    public ItemBuilder AddTag(String key, long value) {
+        item = versionAdaptor.AddTag(item, key, value);
         return this;
     }
 
