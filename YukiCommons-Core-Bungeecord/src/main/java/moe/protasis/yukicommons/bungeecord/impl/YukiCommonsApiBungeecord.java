@@ -6,12 +6,9 @@ import moe.protasis.yukicommons.api.json.IJsonTypeAdapter;
 import moe.protasis.yukicommons.api.nms.event.IPacketEventPacketListener;
 import moe.protasis.yukicommons.api.player.WrappedPlayer;
 import moe.protasis.yukicommons.api.plugin.IAbstractPlugin;
-import moe.protasis.yukicommons.impl.json.serializer.DateTimeSerializer;
-import moe.protasis.yukicommons.impl.json.serializer.JsonWrapperSerializer;
+import moe.protasis.yukicommons.impl.json.serializer.*;
 import moe.protasis.yukicommons.bungeecord.impl.player.BungeecordAutoPlayerLoadData;
 import moe.protasis.yukicommons.api.nms.IVersionAdaptor;
-import moe.protasis.yukicommons.impl.json.serializer.SimpleLocationSerializer;
-import moe.protasis.yukicommons.impl.json.serializer.UUIDSerializer;
 import moe.protasis.yukicommons.util.EnvironmentType;
 import net.md_5.bungee.api.ProxyServer;
 
@@ -24,7 +21,8 @@ public class YukiCommonsApiBungeecord implements IYukiCommonsAPI {
         new DateTimeSerializer(),
         new JsonWrapperSerializer(),
         new UUIDSerializer(),
-        new SimpleLocationSerializer()
+        new SimpleLocationSerializer(),
+        new InstantSerializer()
     );
 
     @Override

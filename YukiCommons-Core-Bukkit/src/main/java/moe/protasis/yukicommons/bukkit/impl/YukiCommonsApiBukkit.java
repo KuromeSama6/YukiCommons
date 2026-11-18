@@ -27,7 +27,8 @@ public class YukiCommonsApiBukkit implements IYukiCommonsAPI {
         new ItemStackSerializer(),
         new LocationSerializer(),
         new PotionEffectSerializer(),
-        new SimpleLocationSerializer()
+        new SimpleLocationSerializer(),
+        new InstantSerializer()
     );
 
     @Override
